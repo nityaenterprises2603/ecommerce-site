@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nitya Enterprises — E‑Commerce</title>
+  <meta name="description" content="Jewellery & Traditional Clothing — Browse, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
+  <style>
+    :root{
+      --maroon:#6A0D25;       /* maroon wine */
+      --orange:#FF6600;       /* orange */
+      --bg:#fff8f3;           /* soft warm background */
+      --ink:#222;             /* text color */
+      --muted:#666;
+      --card:#ffffff;
+      --ring: rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit}
+    header{position:sticky;top:0;z-index:50;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
+    .wrap{max-width:1100px;margin:auto;padding:0 16px}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;gap:10px;align-items:center}
+    .brand .logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--orange),#ffa366);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+    .brand h1{font-size:1.05rem;margin:0;letter-spacing:.3px}
+    .menu{display:flex;flex-wrap:wrap;gap:10px}
+    .menu a{padding:8px 10px;border-radius:8px;color:#fff;text-decoration:none}
+    .menu a:hover{background:rgba(255,255,255,.12)}
+    .bucket-btn{display:inline-flex;gap:8px;align-items:center;background:var(--orange);color:#fff;padding:8px 12px;border-radius:999px;border:none;font-weight:700;cursor:pointer}
+    .count{background:#fff;color:var(--orange);font-weight:800;border-radius:999px;padding:2px 8px}
+
+    .hero{background:linear-gradient(180deg,rgba(106,13,37,.10),rgba(255,102,0,.08));padding:28px 0}
+    .hero h2{margin:6px 0;font-size:1.6rem}
+    .hero p{color:#2d2d2d;margin:6px 0 2px}
+    .tag{display:inline-block;background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;margin-top:8px}
+
+    .section{padding:28px 0}
+    .section h3{margin:0 0 14px;font-size:1.25rem;color:var(--maroon)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.04)}
+    .thumb{aspect-ratio:4/3;background:#f1f1f1;display:block;width:100%;object-fit:cover}
+    .pad{padding:12px}
+    .title{font-weight:700;margin:0 0 4px}
+    .price{color:var(--muted);font-size:.95rem}
+    .btns{display:flex;gap:8px;margin-top:10px}
+    .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:8px 10px;border:1px solid var(--ring);background:#fff;cursor:pointer}
+    .btn.add{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+    .btn.remove{color:var(--maroon);font-weight:700}
+    .btn.bucket{background:var(--maroon);color:#fff}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    /* Bucket panel */
+    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:60;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(0)}
+    .drawer header{background:#fff;color:var(--ink);border-bottom:1px solid var(--ring)}
+    .drawer h4{margin:0;font-size:1.1rem}
+    .drawer .body{padding:12px;overflow:auto;flex:1}
+    .cart-item{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;border-bottom:1px dashed var(--ring);padding:10px 0}
+    .cart-item img{width:56px;height:42px;object-fit:cover;border-radius:6px}
+    .small{color:var(--muted);font-size:.9rem}
+    .row{display:flex;justify-content:space-between;gap:10px;margin:6px 0}
+    .total{font-weight:800;font-size:1.05rem}
+
+    .order{background:#fff;border:1px solid var(--ring);border-radius:14px;padding:14px}
+    form label{display:block;margin-top:12px;font-weight:600}
+    form input, form textarea, form select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--ring);background:#fff}
+    form textarea{min-height:120px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .cta{background:var(--orange);color:#fff;border:none;padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer}
+    .ghost{background:#fff;color:var(--maroon);border:2px solid var(--maroon)}
+
+    .upi{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:10px}
+    .upi .qr{width:160px;height:160px;border-radius:12px;border:1px solid var(--ring);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
+    .muted{color:var(--muted)}
+
+    footer{background:var(--maroon);color:#fff;margin-top:28px}
+    footer .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:14px 16px}
+    code.kbd{background:#fff2e6;border:1px solid var(--orange);padding:2px 6px;border-radius:6px}
+
+    /* badges for group headings */
+    .badge{display:inline-block;background:var(--maroon);color:#fff;padding:6px 12px;border-radius:999px;margin-bottom:10px;font-weight:700}
+    .subnav{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+    .subnav a{background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;text-decoration:none}
+    .subnav a:hover{border-color:var(--orange)}
+
+    @media (max-width:720px){
+      .upi{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand">
+        <div class="logo" aria-hidden="true">NE</div>
+        <h1>Nitya Enterprises — Jewellery & Traditional Clothing</h1>
+      </div>
+      <nav class="menu" aria-label="Main Navigation">
+        <a href="#jewellery">Jewellery</a>
+        <a href="#traditional">Traditional Clothing</a>
+        <a href="#order">Order</a>
+        <a href="#contact">Contact</a>
+        <button class="bucket-btn" id="openBucket" title="Open Bucket" aria-haspopup="dialog">
+          🧺 Bucket <span class="count" id="bucketCount">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap">
+      <span class="tag">Orange & Maroon Wine Theme</span>
+      <h2>Shop handcrafted Jewellery & Traditional Wear</h2>
+      <p>Add items to your <strong>Bucket</strong>, pay via <strong>UPI</strong>, then send your order by <strong>Email</strong> & <strong>WhatsApp</strong>.</p>
+    </div>
+  </section>
+
+  <!-- Jewellery -->
+  <section id="jewellery" class="section wrap">
+    <span class="badge">Main Category: Jewellery</span>
+    <div class="subnav" aria-label="Jewellery subcategories">
+      <a href="#Earrings">Earrings</a>
+      <a href="#Necklaces">Necklaces</a>
+      <a href="#Rings">Rings</a>
+      <a href="#Anklets">Anklets</a>
+      <a href="#Bangles">Bangles</a>
+      <a href="#Bracelets">Bracelets</a>
+      <a href="#NecklacesWithEarrings">Necklaces with Earrings</a>
+    </div>
+
+    <div id="Earrings"><h3>Earrings</h3><div class="grid" data-grid="Earrings"></div></div>
+    <div id="Necklaces"><h3>Necklaces</h3><div class="grid" data-grid="Necklaces"></div></div>
+    <div id="Rings"><h3>Rings</h3><div class="grid" data-grid="Rings"></div></div>
+    <div id="Anklets"><h3>Anklets</h3><div class="grid" data-grid="Anklets"></div></div>
+    <div id="Bangles"><h3>Bangles</h3><div class="grid" data-grid="Bangles"></div></div>
+    <div id="Bracelets"><h3>Bracelets</h3><div class="grid" data-grid="Bracelets"></div></div>
+    <div id="NecklacesWithEarrings"><h3>Necklaces with Earrings</h3><div class="grid" data-grid="Necklaces with Earrings"></div></div>
+  </section>
+
+  <!-- Traditional Clothing -->
+  <section id="traditional" class="section wrap">
+    <span class="badge">Main Category: Traditional Clothing</span>
+    <div class="subnav" aria-label="Traditional subcategories">
+      <a href="#ChaniyaCholi">Chaniya Choli</a>
+      <a href="#Kurtis">Kurtis</a>
+      <a href="#Kurta">Kurta</a>
+    </div>
+    <div id="ChaniyaCholi"><h3>Chaniya Choli</h3><div class="grid" data-grid="Chaniya Choli"></div></div>
+    <div id="Kurtis"><h3>Kurtis</h3><div class="grid" data-grid="Kurtis"></div></div>
+    <div id="Kurta"><h3>Kurta</h3><div class="grid" data-grid="Kurta"></div></div>
+  </section>
+
+  <!-- Order & Payment -->
+  <section id="order" class="section wrap">
+    <h3>Order & Payment</h3>
+    <div class="order">
+      <p class="muted">Fill your details, review your bucket, then <strong>submit by Email</strong> and/or <strong>send via WhatsApp</strong>. Pay securely using the UPI options below.</p>
+
+      <div class="row"><span>Grand Total:</span> <span class="total" id="grandTotal">₹0</span></div>
+
+      <div class="upi" aria-label="UPI payment options">
+        <div>
+          <label>UPI ID</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="upiId" value="REPLACE_WITH_YOUR_UPI_ID" readonly />
+            <button class="btn" id="copyUpi">Copy</button>
+          </div>
+          <div class="actions">
+            <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
+            <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
+          </div>
+          <p class="muted" style="margin:6px 0 0">Deep link uses the amount in your bucket (updates live). Replace the UPI ID above in the code.</p>
+        </div>
+        <div class="qr" id="qrBox" aria-label="UPI QR Code">
+          <!-- QR image injected by JS -->
+          <span class="muted" id="qrHint">QR</span>
+        </div>
+      </div>
+
+      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
+        <!-- FormSubmit helpers -->
+        <input type="hidden" name="_subject" value="New Order — Nitya Enterprises"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+        <input type="hidden" name="order_details" id="order_details"/>
+        <input type="hidden" name="order_total" id="order_total"/>
+
+        <label for="custName">Customer Name</label>
+        <input id="custName" name="customer_name" placeholder="Your full name" required />
+
+        <label for="mobile">Customer Mobile No (10 digits)</label>
+        <input id="mobile" name="customer_mobile" inputmode="numeric" pattern="[0-9]{10}" placeholder="e.g., 9510683160" required />
+
+        <label for="altContact">Contact No (Alternate)</label>
+        <input id="altContact" name="alternate_contact" inputmode="numeric" pattern="[0-9]{10}" placeholder="Optional" />
+
+        <label for="addr">Address (Building No, Landmark, Area, City, State, Pincode)</label>
+        <textarea id="addr" name="address" placeholder="Building No, Landmark, Area, City, State, Pincode" required></textarea>
+
+        <label for="notes">Any Notes (Size/Color preferences, etc.)</label>
+        <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+
+        <label for="summary">Order Summary (auto-filled)</label>
+        <textarea id="summary" readonly></textarea>
+
+        <div class="actions">
+          <button type="submit" class="cta">Submit Order by Email</button>
+          <button type="button" class="btn" id="sendWhatsApp">Send Order via WhatsApp</button>
+          <button type="button" class="btn ghost" id="clearBucket">Clear Bucket</button>
+        </div>
+        <p class="muted">Orders are sent to <strong>salesnityaenterprises@gmail.com</strong> and can also be shared to WhatsApp <strong>+91 9510683160</strong>.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="section wrap">
+    <h3>Contact Us</h3>
+    <p>Email: <a href="mailto:salesnityaenterprises@gmail.com">salesnityaenterprises@gmail.com</a> &nbsp; | &nbsp; Mobile: <a href="tel:+919510683160">+91 9510683160</a></p>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div>© <span id="yr"></span> Nitya Enterprises • Ahmedabad • All India shipping</div>
+      <div>Theme: <code class="kbd">Orange</code> & <code class="kbd">Maroon Wine</code></div>
+    </div>
+  </footer>
+
+  <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <header class="wrap" style="padding:12px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h4 id="drawerTitle">Your Bucket</h4>
+        <button class="btn" id="closeBucket">Close ✕</button>
+      </div>
+    </header>
+    <div class="body" id="cartList"></div>
+    <div class="pad" style="border-top:1px solid var(--ring)">
+      <div class="row"><span>Items:</span><span id="bucketItems">0</span></div>
+      <div class="row total"><span>Total:</span><span id="bucketTotal">₹0</span></div>
+      <div class="actions">
+        <a class="btn bucket" href="#order" id="goOrder">Proceed to Order</a>
+        <button class="btn" id="emptyCart">Empty</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ==============================
+       QUICK SETUP — EDIT THESE TWO
+       ============================== */
+    const SELLER_WHATSAPP = "+919510683160"; // WhatsApp number in international format
+    const UPI_ID = "REPLACE_WITH_YOUR_UPI_ID"; // e.g., 9510683160@upi or your VPA
+    const PAYEE_NAME = "Nitya Enterprises";     // Appears in UPI apps
+
+    /* ===== Sample Catalog (edit/extend freely) ===== */
+    const catalog = [
+      // Jewellery
+      {id:"ear-01", name:"Kundan Drop Earrings", price:899, cat:"Earrings", img:"https://via.placeholder.com/640x480?text=Earrings+1"},
+      {id:"ear-02", name:"Stud Pearl Earrings", price:499, cat:"Earrings", img:"https://via.placeholder.com/640x480?text=Earrings+2"},
+      {id:"neck-01", name:"Gold Plated Necklace", price:1999, cat:"Necklaces", img:"https://via.placeholder.com/640x480?text=Necklace+1"},
+      {id:"neck-02", name:"Temple Necklace", price:2499, cat:"Necklaces", img:"https://via.placeholder.com/640x480?text=Necklace+2"},
+      {id:"ring-01", name:"Classic Ring", price:399, cat:"Rings", img:"https://via.placeholder.com/640x480?text=Ring+1"},
+      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/640x480?text=Anklet+1"},
+      {id:"ban-01", name:"Traditional Bangles", price:799, cat:"Bangles", img:"https://via.placeholder.com/640x480?text=Bangles+1"},
+      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/640x480?text=Bracelet+1"},
+      {id:"set-01", name:"Necklace with Earrings Set", price:2899, cat:"Necklaces with Earrings", img:"https://via.placeholder.com/640x480?text=Set+1"},
+      // Traditional Clothing
+      {id:"cc-01", name:"Navratri Chaniya Choli", price:3499, cat:"Chaniya Choli", img:"https://via.placeholder.com/640x480?text=Chaniya+Choli+1"},
+      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/640x480?text=Kurti+1"},
+      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/640x480?text=Kurta+1"}
+    ];
+
+    /* ===== Render Catalog by Subcategory ===== */
+    function renderCatalog(){
+      const groups = document.querySelectorAll('[data-grid]');
+      groups.forEach(g => g.innerHTML = "");
+      catalog.forEach(p => {
+        const grid = document.querySelector(`[data-grid="${p.cat}"]`);
+        if(!grid) return;
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <img class="thumb" src="${p.img}" alt="${p.name}"/>
+          <div class="pad">
+            <div class="title">${p.name}</div>
+            <div class="price">₹${p.price.toLocaleString()}</div>
+            <div class="btns">
+              <button class="btn add" data-add="${p.id}">Add to Bucket</button>
+              <button class="btn remove" data-remove="${p.id}">Remove</button>
+            </div>
+          </div>`;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ===== Simple Bucket (Cart) with localStorage ===== */
+    const CART_KEY = 'nitya_cart_v1';
+    const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+
+    function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+
+    function addItem(id, qty=1){ cart[id] = (cart[id]||0)+qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function removeItem(id, qty=1){ if(!cart[id]) return; cart[id] -= qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
+
+    function cartItems(){ return Object.entries(cart).map(([id,q])=> ({...catalog.find(p=>p.id===id), qty:q})).filter(Boolean); }
+    function cartTotal(){ return cartItems().reduce((s,i)=> s + i.price*i.qty, 0); }
+
+    /* ===== UI Refresh ===== */
+    const bucketCount = document.getElementById('bucketCount');
+    const bucketTotal = document.getElementById('bucketTotal');
+    const bucketItemsEl = document.getElementById('bucketItems');
+    const cartList = document.getElementById('cartList');
+    const grandTotal = document.getElementById('grandTotal');
+    const orderSummary = document.getElementById('summary');
+    const hiddenDetails = document.getElementById('order_details');
+    const hiddenTotal = document.getElementById('order_total');
+
+    function refresh(){
+      // badges
+      const items = cartItems();
+      const total = cartTotal();
+      bucketCount.textContent = items.reduce((s,i)=>s+i.qty,0);
+      bucketItemsEl.textContent = bucketCount.textContent;
+      bucketTotal.textContent = `₹${total.toLocaleString()}`;
+      grandTotal.textContent = `₹${total.toLocaleString()}`;
+
+      // list
+      cartList.innerHTML = items.length ? '' : '<p class="muted">Your bucket is empty. Add some products!</p>';
+      items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        row.innerHTML = `
+          <img src="${it.img}" alt="${it.name}">
+          <div>
+            <div class="title">${it.name}</div>
+            <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()}</div>
+          </div>
+          <div>
+            <button class="btn" onclick="addItem('${it.id}',1)">+1</button>
+            <button class="btn" onclick="removeItem('${it.id}',1)">−1</button>
+          </div>`;
+        cartList.appendChild(row);
+      });
+
+      // order summary text
+      const lines = items.map(it => `• ${it.name} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
+      const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
+      orderSummary.value = summaryText;
+      hiddenDetails.value = summaryText;
+      hiddenTotal.value = total;
+
+      // Update UPI link & QR
+      updateUpi(total);
+    }
+
+    /* ===== Event Delegation for Add/Remove ===== */
+    document.addEventListener('click', (e)=>{
+      const add = e.target.closest('[data-add]');
+      const rem = e.target.closest('[data-remove]');
+      if(add){ addItem(add.dataset.add,1); }
+      if(rem){ removeItem(rem.dataset.remove,1); }
+    });
+
+    /* ===== Drawer (Bucket) ===== */
+    const drawer = document.getElementById('drawer');
+    document.getElementById('openBucket').addEventListener('click', ()=>drawer.classList.add('open'));
+    document.getElementById('closeBucket').addEventListener('click', ()=>drawer.classList.remove('open'));
+    document.getElementById('emptyCart').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
+    document.getElementById('goOrder').addEventListener('click', ()=>drawer.classList.remove('open'));
+
+    /* ===== UPI generation (Deep Link + QR) ===== */
+    const upiDeepLink = document.getElementById('upiDeepLink');
+    const qrBox = document.getElementById('qrBox');
+    const qrHint = document.getElementById('qrHint');
+    const copyUpiBtn = document.getElementById('copyUpi');
+    const refreshQR = document.getElementById('refreshQR');
+
+    function upiUrl(amount){
+      const params = new URLSearchParams({
+        pa: UPI_ID,        // payee address (VPA)
+        pn: PAYEE_NAME,    // payee name
+        am: String(amount||''), // amount
+        cu: 'INR'          // currency
+      });
+      return `upi://pay?${params.toString()}`;
+    }
+
+    function updateUpi(amount){
+      // deep link
+      upiDeepLink.href = upiUrl(amount);
+      // QR image (uses a public QR service)
+      const data = encodeURIComponent(upiUrl(amount));
+      const src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${data}`;
+      qrBox.innerHTML = `<img alt="UPI QR Code" width="160" height="160" src="${src}">`;
+    }
+
+    copyUpiBtn.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(UPI_ID).then(()=>{
+        copyUpiBtn.textContent='Copied!';
+        setTimeout(()=>copyUpiBtn.textContent='Copy',1200);
+      });
+    });
+
+    refreshQR.addEventListener('click', ()=> updateUpi(cartTotal()));
+
+    /* ===== WhatsApp share ===== */
+    const sendWhatsApp = document.getElementById('sendWhatsApp');
+    sendWhatsApp.addEventListener('click', ()=>{
+      const name = document.getElementById('custName').value || '(No name)';
+      const mobile = document.getElementById('mobile').value || '(No mobile)';
+      const alt = document.getElementById('altContact').value || '-';
+      const address = document.getElementById('addr').value || '(No address)';
+      const notes = document.getElementById('notes').value || '-';
+      const text = `*New Order — Nitya Enterprises*\n\n`+
+        `*Customer:* ${name}\n*Mobile:* ${mobile}\n*Alt:* ${alt}\n*Address:* ${address}\n*Notes:* ${notes}\n\n`+
+        `${orderSummary.value.replaceAll('\n','%0A')}`;
+      const url = `https://wa.me/${SELLER_WHATSAPP}?text=${text}`;
+      window.open(url,'_blank','noopener');
+    });
+
+    /* ===== Form validation (basic) ===== */
+    document.getElementById('orderForm').addEventListener('submit', (e)=>{
+      if(cartTotal() <= 0){
+        e.preventDefault();
+        alert('Your bucket is empty. Please add items before submitting.');
+      } else if(!document.getElementById('mobile').checkValidity()){
+        e.preventDefault();
+        alert('Please enter a valid 10‑digit mobile number.');
+      }
+      // Otherwise, the form will submit to FormSubmit and email you.
+    });
+
+    // Init
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    renderCatalog();
+    refresh();
+  </script>
+
+  
+  -->
+</body>
+</html>
