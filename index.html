@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nitya Enterprises — E‑Commerce</title>
+  <title>Nitya Enterprises — E-Commerce</title>
   <meta name="description" content="Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
   <style>
     :root{
@@ -80,7 +80,7 @@
     .ghost{background:#fff;color:var(--maroon);border:2px solid var(--maroon)}
 
     .upi{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:10px}
-    .upi .qr{width:250px;height:280px;border-radius:05px;border:1px solid var(--ring);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
+    .upi .qr{width:220px;height:220px;border-radius:8px;border:1px solid var(--ring);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
     .muted{color:var(--muted)}
 
     footer{background:var(--maroon);color:#fff;margin-top:28px}
@@ -119,7 +119,7 @@
 
   <section class="hero">
     <div class="wrap">
-      <span class="tag">Orange + Maroon‑Wine Theme</span>
+      <span class="tag">Orange + Maroon-Wine Theme</span>
       <h2>Shop handcrafted Jewellery & Traditional Wear</h2>
       <p>Add items to your <strong>Bucket</strong>, pick <strong>Size</strong> where required, pay via <strong>UPI</strong>, then send your order by <strong>Email</strong> & <strong>WhatsApp</strong>.</p>
     </div>
@@ -172,21 +172,20 @@
         <div>
           <label>UPI ID</label>
           <div style="display:flex;gap:8px;align-items:center">
-          <input id="upiId" value="7990639743@ybl" readonly />
-          <button class="btn" id="copyUpi">Copy</button>
-      </div>
-
-     <div class="actions">
-        <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
-        <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
-      </div>
-
-   <p class="muted" style="margin:6px 0 0">Deep link uses the amount in your bucket (updates live). Replace the UPI ID above in the code.</p>
-
-<div class="qr" id="qrBox" aria-label="UPI QR Code">
-  <img src="asset/UPI QR CODE.JPG" alt="UPI QR Code"  style="max-width:150%; height:auto;" />
-  <span class="muted" id="qrHint">QR</span>
-</div>
+            <input id="upiId" value="7990639743@ybl" readonly />
+            <button class="btn" id="copyUpi">Copy</button>
+          </div>
+          <div class="actions">
+            <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
+            <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
+          </div>
+          <p class="muted" style="margin:6px 0 0">Deep link & QR use the amount in your bucket (updates live).</p>
+        </div>
+        <div class="qr" id="qrBox" aria-label="UPI QR Code">
+          <!-- QR image injected by JS -->
+          <span class="muted" id="qrHint">QR</span>
+        </div>
+      </div> <!-- /upi -->
 
       <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
         <!-- FormSubmit helpers -->
@@ -219,7 +218,7 @@
           <button type="button" class="btn" id="sendWhatsApp">Send Order via WhatsApp</button>
           <button type="button" class="btn ghost" id="clearBucket">Clear Bucket</button>
         </div>
-        <p class="muted">Orders are sent to <strong>salesnityaenterprises@gmail.com</strong> and can also be shared to WhatsApp <strong>+91 9510683160</strong>.</p>
+        <p class="muted">Orders go to <strong>salesnityaenterprises@gmail.com</strong> and can also be sent to WhatsApp <strong>+91 9510683160</strong>.</p>
       </form>
     </div>
   </section>
@@ -233,7 +232,6 @@
   <footer>
     <div class="wrap">
       <div>© <span id="yr"></span> Nitya Enterprises • Ahmedabad • All India shipping</div>
-     
     </div>
   </footer>
 
@@ -257,11 +255,11 @@
 
   <script>
     /* ==============================
-       QUICK SETUP — EDIT THESE TWO
+       QUICK SETUP
        ============================== */
-    const SELLER_WHATSAPP = "+919510683160"; // WhatsApp number in international format
-    const UPI_ID = "REPLACE_WITH_YOUR_UPI_ID"; // e.g., 9510683160@upi or your VPA
-    const PAYEE_NAME = "Nitya Enterprises";     // Appears in UPI apps
+    const SELLER_WHATSAPP = "+919510683160"; // WhatsApp in international format
+    const UPI_ID = "7990639743@ybl";         // Your VPA
+    const PAYEE_NAME = "Nitya Enterprises";  // Appears in UPI apps
 
     /* ===== Catalog with size options where applicable ===== */
     const catalog = [
@@ -273,7 +271,7 @@
 
       // RINGS — with size buttons
       {id:"ring-01", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-02", name:"Olive Ring", price:399, cat:"Rings",   img:"assets/Ring 3_2_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-02", name:"Olive Ring", price:399, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
       {id:"ring-03", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
       {id:"ring-04", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
       {id:"ring-05", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
@@ -284,7 +282,7 @@
       {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
       {id:"set-01", name:"Necklace with Earrings Set", price:2899, cat:"Necklaces with Earrings", img:"https://via.placeholder.com/800x600?text=Set+1"},
 
-      // Traditional Clothing — will default to S/M/L/XL/XXL if sizes omitted
+      // Traditional Clothing — sizes default to S/M/L/XL/XXL
       {id:"cc-01", name:"Navratri Chaniya Choli", price:3499, cat:"Chaniya Choli", img:"https://via.placeholder.com/800x600?text=Chaniya+Choli+1"},
       {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/800x600?text=Kurti+1"},
       {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
@@ -294,10 +292,11 @@
     const DEFAULT_SIZES = {
       "Chaniya Choli": ["S","M","L","XL","XXL"],
       "Kurtis": ["S","M","L","XL","XXL"],
-      "Kurta": ["S","M","L","XL","XXL"]
+      "Kurta": ["S","M","L","XL","XXL"],
+      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"] // added per your spec
     };
 
-    /* ===== State for per‑product selected size ===== */
+    /* ===== State for per-product selected size ===== */
     const selectedSize = new Map(); // key: productId, value: size
 
     /* ===== Render Catalog by Subcategory ===== */
@@ -311,7 +310,7 @@
         const card = document.createElement('div');
         card.className = 'card';
 
-        // Build size buttons if sizes available
+        // Build size buttons (from explicit sizes or default by category)
         let sizeBlock = '';
         const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
         if (availSizes.length) {
@@ -339,11 +338,10 @@
     }
 
     /* ===== Simple Bucket (Cart) with localStorage ===== */
-    const CART_KEY = 'nitya_cart_v2_sizes';
+    const CART_KEY = 'nitya_cart_v3_sizes';
     const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
 
     function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
-
     function addItem(id, qty=1){ cart[id] = (cart[id]||0)+qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
     function removeItem(id, qty=1){ if(!cart[id]) return; cart[id] -= qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
     function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
@@ -400,11 +398,9 @@
         cartList.appendChild(row);
       });
 
-      const lines = items.map(it => `• ${it.name}${it.size?` (Size ${it.size})`:''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
-      const summaryText = (lines.join('
-') || 'No items in bucket') + `
-
-Total: ₹${total.toLocaleString()}`;
+      // FIXED: no raw newline inside string literals
+      const lines = items.map(it => `• ${it.name}${it.size ? ' (Size ' + it.size + ')' : ''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
+      const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
       orderSummary.value = summaryText;
       hiddenDetails.value = summaryText;
       hiddenTotal.value = total;
@@ -419,7 +415,6 @@ Total: ₹${total.toLocaleString()}`;
         const pid = sizeBtn.getAttribute('data-for');
         const sz = sizeBtn.getAttribute('data-size');
         selectedSize.set(pid, sz);
-        // update visual pressed state within this card
         const card = sizeBtn.closest('.card');
         card.querySelectorAll(`.size-btn[data-for="${pid}"]`).forEach(b=>b.setAttribute('aria-pressed','false'));
         sizeBtn.setAttribute('aria-pressed','true');
@@ -431,7 +426,8 @@ Total: ₹${total.toLocaleString()}`;
       if(add){
         const pid = add.dataset.add;
         const product = catalog.find(p=>p.id===pid);
-        if(product && Array.isArray(product.sizes) && product.sizes.length){
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
           addItem(`${pid}__${sel}`,1);
@@ -439,7 +435,18 @@ Total: ₹${total.toLocaleString()}`;
           addItem(pid,1);
         }
       }
-      if(rem){ removeItem(rem.dataset.remove,1); }
+      if(rem){
+        const pid = rem.dataset.remove;
+        const product = catalog.find(p=>p.id===pid);
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
+          const sel = selectedSize.get(pid);
+          if(!sel){ alert('Select a size to remove.'); return; }
+          removeItem(`${pid}__${sel}`,1);
+        }else{
+          removeItem(pid,1);
+        }
+      }
     });
 
     /* ===== Drawer (Bucket) ===== */
@@ -448,6 +455,7 @@ Total: ₹${total.toLocaleString()}`;
     document.getElementById('closeBucket').addEventListener('click', ()=>drawer.classList.remove('open'));
     document.getElementById('emptyCart').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
     document.getElementById('goOrder').addEventListener('click', ()=>drawer.classList.remove('open'));
+    document.getElementById('clearBucket').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
 
     /* ===== UPI generation (Deep Link + QR) ===== */
     const upiDeepLink = document.getElementById('upiDeepLink');
@@ -462,8 +470,8 @@ Total: ₹${total.toLocaleString()}`;
     function updateUpi(amount){
       upiDeepLink.href = upiUrl(amount);
       const data = encodeURIComponent(upiUrl(amount));
-      const src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${data}`;
-      qrBox.innerHTML = `<img alt="UPI QR Code" width="160" height="160" src="${src}">`;
+      const src = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${data}`;
+      qrBox.innerHTML = `<img alt="UPI QR Code" width="220" height="220" style="width:100%;height:100%;object-fit:contain" src="${src}">`;
     }
 
     copyUpiBtn.addEventListener('click', ()=>{
@@ -483,26 +491,17 @@ Total: ₹${total.toLocaleString()}`;
       const alt = document.getElementById('altContact').value || '-';
       const address = document.getElementById('addr').value || '(No address)';
       const notes = document.getElementById('notes').value || '-';
-      const text = `*New Order — Nitya Enterprises*
-
-`+
-        `*Customer:* ${name}
-*Mobile:* ${mobile}
-*Alt:* ${alt}
-*Address:* ${address}
-*Notes:* ${notes}
-
-`+
-        `${orderSummary.value.replaceAll('
-','%0A')}`;
-      const url = `https://wa.me/${SELLER_WHATSAPP}?text=${text}`;
+      const text = `*New Order — Nitya Enterprises*\n\n`+
+        `*Customer:* ${name}\n*Mobile:* ${mobile}\n*Alt:* ${alt}\n*Address:* ${address}\n*Notes:* ${notes}\n\n`+
+        `${orderSummary.value}`;
+      const url = `https://wa.me/${SELLER_WHATSAPP}?text=${encodeURIComponent(text)}`;
       window.open(url,'_blank','noopener');
     });
 
     /* ===== Form validation (basic) ===== */
     document.getElementById('orderForm').addEventListener('submit', (e)=>{
       if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
-      if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10‑digit mobile number.'); return; }
+      if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10-digit mobile number.'); return; }
     });
 
     // Init
@@ -512,22 +511,3 @@ Total: ₹${total.toLocaleString()}`;
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
