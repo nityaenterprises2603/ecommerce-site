@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nitya Enterprises — E‑Commerce</title>
-  <meta name="description" content="Jewellery & Traditional Clothing — Browse, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
+  <meta name="description" content="Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
   <style>
     :root{
       --maroon:#6A0D25;       /* maroon wine */
@@ -38,13 +38,21 @@
 
     .section{padding:28px 0}
     .section h3{margin:0 0 14px;font-size:1.25rem;color:var(--maroon)}
-    .grid{display: grid;grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));gap: 20px;}
-    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.04)}
-    .thumb{aspect-ratio:4/3;background:#f1f1f1;display:block;width:100%;object-fit:cover}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.06);transition:.2s ease}
+    .card:hover{transform:translateY(-2px)}
+    .thumb{width:100%;height:280px;object-fit:cover;background:#f1f1f1;display:block}
     .pad{padding:12px}
     .title{font-weight:700;margin:0 0 4px}
     .price{color:var(--muted);font-size:.95rem}
-    .btns{display:flex;gap:8px;margin-top:10px}
+
+    /* size buttons */
+    .sizes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .size-btn{border:1px solid var(--ring);background:#fff;padding:6px 10px;border-radius:999px;cursor:pointer;font-weight:600}
+    .size-btn[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+    .size-hint{font-size:.85rem;color:var(--muted);margin-top:4px}
+
+    .btns{display:flex;gap:8px;margin-top:12px}
     .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:8px 10px;border:1px solid var(--ring);background:#fff;cursor:pointer}
     .btn.add{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
     .btn.remove{color:var(--maroon);font-weight:700}
@@ -111,9 +119,9 @@
 
   <section class="hero">
     <div class="wrap">
-      <span class="tag"> </span>
+      <span class="tag">Orange + Maroon‑Wine Theme</span>
       <h2>Shop handcrafted Jewellery & Traditional Wear</h2>
-      <p>Add items to your <strong>Bucket</strong>, pay via <strong>UPI</strong>, then send your order by <strong>Email</strong> & <strong>WhatsApp</strong>.</p>
+      <p>Add items to your <strong>Bucket</strong>, pick <strong>Size</strong> where required, pay via <strong>UPI</strong>, then send your order by <strong>Email</strong> & <strong>WhatsApp</strong>.</p>
     </div>
   </section>
 
@@ -254,28 +262,42 @@
     const UPI_ID = "REPLACE_WITH_YOUR_UPI_ID"; // e.g., 9510683160@upi or your VPA
     const PAYEE_NAME = "Nitya Enterprises";     // Appears in UPI apps
 
-    /* ===== Sample Catalog (edit/extend freely) ===== */
+    /* ===== Catalog with size options where applicable ===== */
     const catalog = [
       // Jewellery
-      {id:"ear-01", name:"Kundan Drop Earrings", price:899, cat:"Earrings", img:"https://via.placeholder.com/640x480?text=Earrings+1"},
-      {id:"ear-02", name:"Stud Pearl Earrings", price:499, cat:"Earrings", img:"https://via.placeholder.com/640x480?text=Earrings+2"},
-      {id:"neck-01", name:"Gold Plated Necklace", price:1999, cat:"Necklaces", img:"https://via.placeholder.com/640x480?text=Necklace+1"},
-      {id:"neck-02", name:"Temple Necklace", price:2499, cat:"Necklaces", img:"https://via.placeholder.com/640x480?text=Necklace+2"},
-      {id:"ring-01", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg"},
-      {id:"ring-02", name:"Olive Ring", size:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],  price:399, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg"},
-      {id:"ring-03", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg"},
-      {id:"ring-04", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg"},
-      {id:"ring-05", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg"},
-      {id:"ring-06", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring1_6_11zon.jpeg"},
-      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/640x480?text=Anklet+1"},
-      {id:"ban-01", name:"Traditional Bangles", price:799, cat:"Bangles", img:"https://via.placeholder.com/640x480?text=Bangles+1"},
-      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/640x480?text=Bracelet+1"},
-      {id:"set-01", name:"Necklace with Earrings Set", price:2899, cat:"Necklaces with Earrings", img:"https://via.placeholder.com/640x480?text=Set+1"},
-      // Traditional Clothing
-      {id:"cc-01", name:"Navratri Chaniya Choli", price:3499, cat:"Chaniya Choli", img:"https://via.placeholder.com/640x480?text=Chaniya+Choli+1"},
-      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/640x480?text=Kurti+1"},
-      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/640x480?text=Kurta+1"}
+      {id:"ear-01", name:"Kundan Drop Earrings", price:899, cat:"Earrings", img:"https://via.placeholder.com/800x600?text=Earrings+1"},
+      {id:"ear-02", name:"Stud Pearl Earrings", price:499, cat:"Earrings", img:"https://via.placeholder.com/800x600?text=Earrings+2"},
+      {id:"neck-01", name:"Gold Plated Necklace", price:1999, cat:"Necklaces", img:"https://via.placeholder.com/800x600?text=Necklace+1"},
+      {id:"neck-02", name:"Temple Necklace", price:2499, cat:"Necklaces", img:"https://via.placeholder.com/800x600?text=Necklace+2"},
+
+      // RINGS — with size buttons
+      {id:"ring-01", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-02", name:"Olive Ring", price:399, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-03", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-04", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-05", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-06", name:"Classic Ring", price:399, cat:"Rings", img:"assets/Ring1_6_11zon.jpeg", sizes:["6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+
+      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/800x600?text=Anklet+1"},
+      {id:"ban-01", name:"Traditional Bangles", price:799, cat:"Bangles", img:"https://via.placeholder.com/800x600?text=Bangles+1"},
+      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
+      {id:"set-01", name:"Necklace with Earrings Set", price:2899, cat:"Necklaces with Earrings", img:"https://via.placeholder.com/800x600?text=Set+1"},
+
+      // Traditional Clothing — will default to S/M/L/XL/XXL if sizes omitted
+      {id:"cc-01", name:"Navratri Chaniya Choli", price:3499, cat:"Chaniya Choli", img:"https://via.placeholder.com/800x600?text=Chaniya+Choli+1"},
+      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/800x600?text=Kurti+1"},
+      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
     ];
+
+    // Default sizes for categories (used when a product has no explicit sizes)
+    const DEFAULT_SIZES = {
+      "Chaniya Choli": ["S","M","L","XL","XXL"],
+      "Kurtis": ["S","M","L","XL","XXL"],
+      "Kurta": ["S","M","L","XL","XXL"]
+    };
+
+    /* ===== State for per‑product selected size ===== */
+    const selectedSize = new Map(); // key: productId, value: size
 
     /* ===== Render Catalog by Subcategory ===== */
     function renderCatalog(){
@@ -284,13 +306,28 @@
       catalog.forEach(p => {
         const grid = document.querySelector(`[data-grid="${p.cat}"]`);
         if(!grid) return;
+
         const card = document.createElement('div');
         card.className = 'card';
+
+        // Build size buttons if sizes available
+        let sizeBlock = '';
+        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
+        if (availSizes.length) {
+          const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
+          sizeBlock = `
+            <div class="sizes" role="group" aria-label="Select size">
+              ${opts}
+            </div>
+            <div class="size-hint">Please select size before adding.</div>`;
+        }
+
         card.innerHTML = `
           <img class="thumb" src="${p.img}" alt="${p.name}"/>
           <div class="pad">
             <div class="title">${p.name}</div>
             <div class="price">₹${p.price.toLocaleString()}</div>
+            ${sizeBlock}
             <div class="btns">
               <button class="btn add" data-add="${p.id}">Add to Bucket</button>
               <button class="btn remove" data-remove="${p.id}">Remove</button>
@@ -301,7 +338,7 @@
     }
 
     /* ===== Simple Bucket (Cart) with localStorage ===== */
-    const CART_KEY = 'nitya_cart_v1';
+    const CART_KEY = 'nitya_cart_v2_sizes';
     const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
 
     function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
@@ -310,7 +347,20 @@
     function removeItem(id, qty=1){ if(!cart[id]) return; cart[id] -= qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
     function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
 
-    function cartItems(){ return Object.entries(cart).map(([id,q])=> ({...catalog.find(p=>p.id===id), qty:q})).filter(Boolean); }
+    function parseCartId(cid){
+      // supports id or id__SIZE
+      const [pid, size] = cid.split('__');
+      return {pid, size};
+    }
+
+    function cartItems(){
+      return Object.entries(cart).map(([cid,q])=>{
+        const {pid, size} = parseCartId(cid);
+        const base = catalog.find(p=>p.id===pid);
+        if(!base) return null;
+        return { ...base, cid, size, qty:q };
+      }).filter(Boolean);
+    }
     function cartTotal(){ return cartItems().reduce((s,i)=> s + i.price*i.qty, 0); }
 
     /* ===== UI Refresh ===== */
@@ -324,7 +374,6 @@
     const hiddenTotal = document.getElementById('order_total');
 
     function refresh(){
-      // badges
       const items = cartItems();
       const total = cartTotal();
       bucketCount.textContent = items.reduce((s,i)=>s+i.qty,0);
@@ -332,40 +381,63 @@
       bucketTotal.textContent = `₹${total.toLocaleString()}`;
       grandTotal.textContent = `₹${total.toLocaleString()}`;
 
-      // list
       cartList.innerHTML = items.length ? '' : '<p class="muted">Your bucket is empty. Add some products!</p>';
       items.forEach(it => {
         const row = document.createElement('div');
         row.className = 'cart-item';
+        const sizeText = it.size ? ` <span class="small">(Size ${it.size})</span>` : '';
         row.innerHTML = `
           <img src="${it.img}" alt="${it.name}">
           <div>
-            <div class="title">${it.name}</div>
+            <div class="title">${it.name}${sizeText}</div>
             <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()}</div>
           </div>
           <div>
-            <button class="btn" onclick="addItem('${it.id}',1)">+1</button>
-            <button class="btn" onclick="removeItem('${it.id}',1)">−1</button>
+            <button class="btn" onclick="addItem('${it.cid}',1)">+1</button>
+            <button class="btn" onclick="removeItem('${it.cid}',1)">−1</button>
           </div>`;
         cartList.appendChild(row);
       });
 
-      // order summary text
-      const lines = items.map(it => `• ${it.name} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
-      const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
+      const lines = items.map(it => `• ${it.name}${it.size?` (Size ${it.size})`:''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
+      const summaryText = (lines.join('
+') || 'No items in bucket') + `
+
+Total: ₹${total.toLocaleString()}`;
       orderSummary.value = summaryText;
       hiddenDetails.value = summaryText;
       hiddenTotal.value = total;
 
-      // Update UPI link & QR
       updateUpi(total);
     }
 
-    /* ===== Event Delegation for Add/Remove ===== */
+    /* ===== Size button selection & add/remove events ===== */
     document.addEventListener('click', (e)=>{
+      const sizeBtn = e.target.closest('.size-btn');
+      if(sizeBtn){
+        const pid = sizeBtn.getAttribute('data-for');
+        const sz = sizeBtn.getAttribute('data-size');
+        selectedSize.set(pid, sz);
+        // update visual pressed state within this card
+        const card = sizeBtn.closest('.card');
+        card.querySelectorAll(`.size-btn[data-for="${pid}"]`).forEach(b=>b.setAttribute('aria-pressed','false'));
+        sizeBtn.setAttribute('aria-pressed','true');
+      }
+
       const add = e.target.closest('[data-add]');
       const rem = e.target.closest('[data-remove]');
-      if(add){ addItem(add.dataset.add,1); }
+
+      if(add){
+        const pid = add.dataset.add;
+        const product = catalog.find(p=>p.id===pid);
+        if(product && Array.isArray(product.sizes) && product.sizes.length){
+          const sel = selectedSize.get(pid);
+          if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
+          addItem(`${pid}__${sel}`,1);
+        }else{
+          addItem(pid,1);
+        }
+      }
       if(rem){ removeItem(rem.dataset.remove,1); }
     });
 
@@ -379,24 +451,15 @@
     /* ===== UPI generation (Deep Link + QR) ===== */
     const upiDeepLink = document.getElementById('upiDeepLink');
     const qrBox = document.getElementById('qrBox');
-    const qrHint = document.getElementById('qrHint');
     const copyUpiBtn = document.getElementById('copyUpi');
     const refreshQR = document.getElementById('refreshQR');
 
     function upiUrl(amount){
-      const params = new URLSearchParams({
-        pa: UPI_ID,        // payee address (VPA)
-        pn: PAYEE_NAME,    // payee name
-        am: String(amount||''), // amount
-        cu: 'INR'          // currency
-      });
+      const params = new URLSearchParams({ pa: UPI_ID, pn: PAYEE_NAME, am: String(amount||''), cu: 'INR' });
       return `upi://pay?${params.toString()}`;
     }
-
     function updateUpi(amount){
-      // deep link
       upiDeepLink.href = upiUrl(amount);
-      // QR image (uses a public QR service)
       const data = encodeURIComponent(upiUrl(amount));
       const src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${data}`;
       qrBox.innerHTML = `<img alt="UPI QR Code" width="160" height="160" src="${src}">`;
@@ -419,23 +482,26 @@
       const alt = document.getElementById('altContact').value || '-';
       const address = document.getElementById('addr').value || '(No address)';
       const notes = document.getElementById('notes').value || '-';
-      const text = `*New Order — Nitya Enterprises*\n\n`+
-        `*Customer:* ${name}\n*Mobile:* ${mobile}\n*Alt:* ${alt}\n*Address:* ${address}\n*Notes:* ${notes}\n\n`+
-        `${orderSummary.value.replaceAll('\n','%0A')}`;
+      const text = `*New Order — Nitya Enterprises*
+
+`+
+        `*Customer:* ${name}
+*Mobile:* ${mobile}
+*Alt:* ${alt}
+*Address:* ${address}
+*Notes:* ${notes}
+
+`+
+        `${orderSummary.value.replaceAll('
+','%0A')}`;
       const url = `https://wa.me/${SELLER_WHATSAPP}?text=${text}`;
       window.open(url,'_blank','noopener');
     });
 
     /* ===== Form validation (basic) ===== */
     document.getElementById('orderForm').addEventListener('submit', (e)=>{
-      if(cartTotal() <= 0){
-        e.preventDefault();
-        alert('Your bucket is empty. Please add items before submitting.');
-      } else if(!document.getElementById('mobile').checkValidity()){
-        e.preventDefault();
-        alert('Please enter a valid 10‑digit mobile number.');
-      }
-      // Otherwise, the form will submit to FormSubmit and email you.
+      if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
+      if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10‑digit mobile number.'); return; }
     });
 
     // Init
@@ -443,19 +509,5 @@
     renderCatalog();
     refresh();
   </script>
-
-  
-  -->
 </body>
-
 </html>
-
-
-
-
-
-
-
-
-
-
