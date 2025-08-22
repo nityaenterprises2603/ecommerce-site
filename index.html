@@ -172,20 +172,21 @@
         <div>
           <label>UPI ID</label>
           <div style="display:flex;gap:8px;align-items:center">
-            <input id="upiId" value="REPLACE_WITH_YOUR_UPI_ID" readonly />
-            <button class="btn" id="copyUpi">Copy</button>
-          </div>
-          <div class="actions">
-            <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
-            <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
-          </div>
-          <p class="muted" style="margin:6px 0 0">Deep link uses the amount in your bucket (updates live). Replace the UPI ID above in the code.</p>
-        </div>
-        <div class="qr" id="qrBox" aria-label="UPI QR Code">
-          <!-- QR image injected by JS -->
-          <span class="muted" id="qrHint">QR</span>
-        </div>
+          <input id="upiId" value="7990639743@ybl" readonly />
+          <button class="btn" id="copyUpi">Copy</button>
       </div>
+
+     <div class="actions">
+        <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
+        <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
+      </div>
+
+   <p class="muted" style="margin:6px 0 0">Deep link uses the amount in your bucket (updates live). Replace the UPI ID above in the code.</p>
+
+<div class="qr" id="qrBox" aria-label="UPI QR Code">
+  <img src="assets/upi.png" alt="UPI QR Code" style="max-width:100%; height:auto;" />
+  <span class="muted" id="qrHint">QR</span>
+</div>
 
       <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
         <!-- FormSubmit helpers -->
@@ -511,3 +512,4 @@ Total: ₹${total.toLocaleString()}`;
   </script>
 </body>
 </html>
+
