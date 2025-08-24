@@ -390,9 +390,9 @@
 
         // Build size buttons (from explicit sizes or default by category)
         let sizeBlock = '';
-        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || [ ]);
+        const SIZE_BAR_DISABLED = true; // enforce Free Size flow
         if (availSizes.length) {
-          const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
+           const FREE_SIZE_LABEL = "Free Size";
           sizeBlock = `
             <div class="sizes" role="group" aria-label="Select size">
               ${opts}
@@ -589,6 +589,7 @@
   </script>
 </body>
 </html>
+
 
 
 
