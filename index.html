@@ -351,7 +351,7 @@
 
         // Build size buttons (from explicit sizes or default by category)
         let sizeBlock = '';
-        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
+        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || [ Free Size]);
         if (availSizes.length) {
           const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
           sizeBlock = `
@@ -550,6 +550,7 @@
   </script>
 </body>
 </html>
+
 
 
 
