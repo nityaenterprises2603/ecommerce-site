@@ -115,17 +115,6 @@
   </style>
 </head>
 <body>
-<!-- Your page content here -->
-
-  <!-- Unregister service workers and clear cache -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
-      if ('caches' in window) {
-        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-      }
-    }
-  </script>
   <header>
     <div class="wrap nav">
       <div class="brand">
@@ -869,9 +858,21 @@
     document.getElementById('yr').textContent = new Date().getFullYear();
     renderCatalog();
     refresh();
+<!-- Your page content here -->
+
+  <!-- Unregister service workers and clear cache -->
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(r => r.unregister()));
+      if ('caches' in window) {
+        caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+      }
+    }
+  
   </script>
 </body>
 </html>
+
 
 
 
