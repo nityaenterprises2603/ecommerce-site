@@ -3,29 +3,35 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nitya Enterprises — E‑Commerce (Cloud‑Synced Inventory)</title>
-  <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Cloud‑synced per‑size inventory with JSONBin, bucket cart, UPI checkout, Email & WhatsApp order."/>
+  <title>Nitya Enterprises — E-Commerce</title>
+  <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
   <style>
+.size-btn:disabled { text-decoration: line-through; opacity: .55; cursor: not-allowed; }
+
     :root{
-      --maroon:#6A0D25; --orange:#FF6600; --bg:#fff8f3; --ink:#222; --muted:#666; --card:#ffffff; --ring: rgba(0,0,0,.08);
-      --oos:#b91c1c; --ok:#1b5e20; --warn:#eab308; --good:#16a34a; --bad:#dc2626; --info:#2563eb;
+      --maroon:#6A0D25;       /* maroon wine */
+      --orange:#FF6600;       /* orange */
+      --bg:#fff8f3;           /* soft warm background */
+      --ink:#222;             /* text color */
+      --muted:#666;
+      --card:#ffffff;
+      --ring: rgba(0,0,0,.08);
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     a{color:inherit}
-    header{position:sticky;top:0;z-index:60;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
+    header{position:sticky;top:0;z-index:50;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
     .wrap{max-width:1100px;margin:auto;padding:0 16px}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
     .brand{display:flex;gap:10px;align-items:center}
     .brand .logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--orange),#ffa366);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
     .brand h1{font-size:1.05rem;margin:0;letter-spacing:.3px}
-    .menu{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    .menu{display:flex;flex-wrap:wrap;gap:10px}
     .menu a{padding:8px 10px;border-radius:8px;color:#fff;text-decoration:none}
     .menu a:hover{background:rgba(255,255,255,.12)}
     .bucket-btn{display:inline-flex;gap:8px;align-items:center;background:var(--orange);color:#fff;padding:8px 12px;border-radius:999px;border:none;font-weight:700;cursor:pointer}
     .count{background:#fff;color:var(--orange);font-weight:800;border-radius:999px;padding:2px 8px}
-    .admin-link{border:1px solid rgba(255,255,255,.5); padding:6px 10px; border-radius:999px; cursor:pointer; font-weight:700}
 
     .hero{background:linear-gradient(180deg,rgba(106,13,37,.10),rgba(255,102,0,.08));padding:28px 0}
     .hero h2{margin:6px 0;font-size:1.6rem}
@@ -42,12 +48,10 @@
     .title{font-weight:700;margin:0 0 4px}
     .price{color:var(--muted);font-size:.95rem}
 
+    /* size buttons */
     .sizes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-    .size-btn{border:1px solid var(--ring);background:#fff;padding:6px 10px;border-radius:999px;cursor:pointer;font-weight:600;position:relative}
+    .size-btn{border:1px solid var(--ring);background:#fff;padding:6px 10px;border-radius:999px;cursor:pointer;font-weight:600}
     .size-btn[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
-    .size-btn[disabled]{opacity:.45;text-decoration:line-through;border-style:dashed;cursor:not-allowed}
-    .size-btn .stock-dot{width:8px;height:8px;border-radius:999px;display:inline-block;margin-left:6px;vertical-align:middle;background:var(--ok)}
-    .size-btn[disabled] .stock-dot{background:var(--oos)}
     .size-hint{font-size:.85rem;color:var(--muted);margin-top:4px}
 
     .btns{display:flex;gap:8px;margin-top:12px}
@@ -57,9 +61,10 @@
     .btn.bucket{background:var(--maroon);color:#fff}
     .btn:disabled{opacity:.55;cursor:not-allowed}
 
-    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:65;display:flex;flex-direction:column}
+    /* Bucket panel */
+    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:60;display:flex;flex-direction:column}
     .drawer.open{transform:translateX(0)}
-    .drawer header{background:#fff;color:#111;border-bottom:1px solid var(--ring)}
+    .drawer header{background:#fff;color:var(--ink);border-bottom:1px solid var(--ring)}
     .drawer h4{margin:0;font-size:1.1rem}
     .drawer .body{padding:12px;overflow:auto;flex:1}
     .cart-item{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;border-bottom:1px dashed var(--ring);padding:10px 0}
@@ -84,32 +89,15 @@
     footer .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:14px 16px}
     code.kbd{background:#fff2e6;border:1px solid var(--orange);padding:2px 6px;border-radius:6px}
 
+    /* badges for group headings */
     .badge{display:inline-block;background:var(--maroon);color:#fff;padding:6px 12px;border-radius:999px;margin-bottom:10px;font-weight:700}
     .subnav{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
     .subnav a{background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;text-decoration:none}
     .subnav a:hover{border-color:var(--orange)}
 
-    @media (max-width:720px){ .upi{grid-template-columns:1fr} }
-
-    /* Modals */
-    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);z-index:80}
-    .modal.open{display:flex}
-    .panel{width:min(920px,95vw);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;border:2px solid var(--maroon);box-shadow:0 20px 60px rgba(0,0,0,.25)}
-    .panel header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ring)}
-    .panel h4{margin:0}
-    .panel .content{padding:16px}
-    .grid2{display:grid;grid-template-columns:180px 1fr;gap:12px}
-    .sizes-editor{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
-    .sizes-editor .cell{border:1px solid var(--ring);border-radius:10px;padding:8px}
-    .note{font-size:.9rem;color:var(--muted)}
-    .danger{color:var(--oos)}
-
-    /* Inline status bar */
-    .statusbar{position:sticky;top:48px;z-index:64;background:#fff7ed;border-bottom:1px solid var(--ring);padding:8px 16px;display:flex;gap:10px;align-items:center}
-    .pill{border-radius:999px;padding:3px 8px;border:1px solid var(--ring);font-size:.85rem}
-    .pill.info{background:#eff6ff;border-color:#bfdbfe}
-    .pill.bad{background:#fef2f2;border-color:#fecaca}
-    .pill.good{background:#ecfdf5;border-color:#bbf7d0}
+    @media (max-width:720px){
+      .upi{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
@@ -128,16 +116,11 @@
         <button class="bucket-btn" id="openBucket" title="Open Bucket" aria-haspopup="dialog">
           🧺 Bucket <span class="count" id="bucketCount">0</span>
         </button>
-        <button class="admin-link" id="openAdmin" title="Inventory Manager">Admin</button>
-        <button class="admin-link" id="openSync" title="Cloud Inventory Settings">⚙️ Sync</button>
-      </nav>
+      
+<button class="bucket-btn" id="openInventory" title="Edit Inventory">📦 Inventory</button>
+</nav>
     </div>
   </header>
-
-  <div class="statusbar" id="statusbar" hidden>
-    <span class="pill info" id="syncState">Sync: Local only</span>
-    <span class="muted" id="statusMsg"></span>
-  </div>
 
   <section class="hero">
     <div class="wrap">
@@ -156,7 +139,7 @@
       <a href="#Anklets">Anklets</a>
       <a href="#Bangles">Bangles</a>
       <a href="#Bracelets">Bracelets</a>
-      <a href="#Mangalsutra">Mangalsutra</a>
+      
     </div>
 
     <div id="Earrings"><h3>Earrings</h3><div class="grid" data-grid="Earrings"></div></div>
@@ -165,7 +148,7 @@
     <div id="Anklets"><h3>Anklets</h3><div class="grid" data-grid="Anklets"></div></div>
     <div id="Bangles"><h3>Bangles</h3><div class="grid" data-grid="Bangles"></div></div>
     <div id="Bracelets"><h3>Bracelets</h3><div class="grid" data-grid="Bracelets"></div></div>
-    <div id="Mangalsutra"><h3>Mangalsutra</h3><div class="grid" data-grid="Mangalsutra"></div></div>
+   
   </section>
 
   <!-- Traditional Clothing -->
@@ -203,11 +186,13 @@
           <p class="muted" style="margin:6px 0 0"> Deep link & QR use the amount in your bucket (updates live).</p>
         </div>
         <div class="qr" id="qrBox" aria-label="UPI QR Code">
+          <!-- QR image injected by JS -->
           <span class="muted" id="qrHint">QR</span>
         </div>
-      </div>
+      </div> <!-- /upi -->
 
       <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
+        <!-- FormSubmit helpers -->
         <input type="hidden" name="_subject" value="New Order — Nitya Enterprises"/>
         <input type="hidden" name="_captcha" value="false"/>
         <input type="hidden" name="_template" value="table"/>
@@ -247,13 +232,13 @@
     <h3>Contact Us</h3>
     <p>Email: <a href="mailto:salesnityaenterprises@gmail.com">salesnityaenterprises@gmail.com</a> &nbsp; | &nbsp; Mobile: <a href="tel:+919510683160">+91 9510683160</a></p>
   </section>
-
-  <!-- Exchange Policy -->
+<!-- Exchange Policy -->
   <section id="Exchange Policy" class="section wrap">
-    <h3>Exchange Policy</h3>
+    <h3> Exchange Policy</h3>
     <ul>
       <li><strong>How to request:</strong> Share your order details along with a <strong>clear video recorded while unpacking the product</strong> via the <a href="#contact">Contact Us</a> details, or WhatsApp us at <strong>+91 95106 83160</strong>.</li>
       <li>Mention the reason for exchange (size issue, wrong item, damaged item, etc.).</li>
+      
     </ul>
   </section>
 
@@ -263,7 +248,6 @@
     </div>
   </footer>
 
-  <!-- Bucket Drawer -->
   <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
     <header class="wrap" style="padding:12px 16px">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
@@ -282,266 +266,193 @@
     </div>
   </div>
 
-  <!-- Inventory Admin Modal -->
-  <div class="modal" id="adminModal" aria-hidden="true" aria-label="Inventory Manager">
-    <div class="panel">
-      <header>
-        <h4>Inventory Manager (Per Size)</h4>
-        <div style="display:flex;gap:8px">
-          <button class="btn ghost" id="exportJson">Export JSON</button>
-          <button class="btn" id="importJson">Import JSON</button>
-          <button class="btn" id="pullCloud">Pull from Cloud</button>
-          <button class="btn" id="pushCloud">Push to Cloud</button>
-          <button class="btn" id="resetInv">Clear All Stock</button>
-          <button class="btn" id="closeAdmin">Close ✕</button>
-        </div>
-      </header>
-      <div class="content">
-        <p class="note">Tip: Leave a field <em>blank</em> for unlimited stock. Set <strong>0</strong> to mark a size as <span class="danger">Out of Stock</span>. Values persist in this browser and can be synced to the cloud when configured.</p>
-        <div class="grid2" style="margin-top:12px">
-          <div>
-            <label for="productPick"><strong>Select Product</strong></label>
-            <select id="productPick"></select>
-          </div>
-          <div>
-            <div class="sizes-editor" id="sizesEditor"></div>
-          </div>
-        </div>
-        <div class="actions" style="margin-top:14px">
-          <button class="cta" id="saveInv">Save Changes</button>
-          <span class="note">Passcode used in this session.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Sync Settings Modal -->
-  <div class="modal" id="syncModal" aria-hidden="true" aria-label="Inventory Sync Settings">
-    <div class="panel">
-      <header>
-        <h4>Cloud Inventory Settings</h4>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="testSync">Test Connection</button>
-          <button class="btn" id="closeSync">Close ✕</button>
-        </div>
-      </header>
-      <div class="content">
-        <p class="note">Use <strong>JSONBin</strong> (recommended) or your own HTTPS endpoint. For JSONBin v3, create a Bin and paste the details below. <a href="https://jsonbin.io/" target="_blank" rel="noopener">jsonbin.io</a></p>
-        <div class="grid2" style="grid-template-columns:1fr 2fr">
-          <div>
-            <label>Provider</label>
-            <select id="syncProvider">
-              <option value="jsonbin">JSONBin (v3)</option>
-              <option value="custom">Custom Endpoint</option>
-            </select>
-          </div>
-          <div></div>
-
-          <div><label>JSONBin Bin ID</label></div>
-          <div><input id="jsonbinId" placeholder="e.g. 66d0abcd1234ef5678901234"/></div>
-
-          <div><label>JSONBin API Key</label></div>
-          <div><input id="jsonbinKey" placeholder="x-master-key"/></div>
-
-          <div><label>Custom GET URL</label></div>
-          <div><input id="customGet" placeholder="https://yourdomain.example/inventory.json"/></div>
-
-          <div><label>Custom PUT/POST URL</label></div>
-          <div><input id="customPut" placeholder="https://yourdomain.example/inventory"/></div>
-        </div>
-        <div class="actions" style="margin-top:14px">
-          <button class="cta" id="saveSync">Save Settings</button>
-          <span class="note">Settings are stored locally in this browser.</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
     /* ==============================
-       CONFIG
+       QUICK SETUP
        ============================== */
-    const SELLER_WHATSAPP = "+919510683160";
-    const UPI_ID = "7990639743@ybl";
-    const PAYEE_NAME = "Nitya Enterprises";
+    const SELLER_WHATSAPP = "+919510683160"; // WhatsApp in international format
+    const UPI_ID = "7990639743@ybl";         // Your VPA
+    const PAYEE_NAME = "Nitya Enterprises";  // Appears in UPI apps
+    // Global: size selection disabled
+    const SIZE_BAR_DISABLED = true; // enforce Free Size flow
     const FREE_SIZE_LABEL = "Free Size";
 
-    const CART_KEY = 'nitya_cart_v4_sizes';
-    const INV_KEY  = 'nitya_inventory_v1';           // { [pid]: { [sizeKey]: number|null }, ... }
-    const ADMIN_PASS = 'nitya@123';
-
-    // Cloud sync config (saved locally, affects cross‑device via remote store)
-    const SYNC_KEY = 'nitya_inventory_sync_v1';      // { provider:'jsonbin'|'custom', jsonbinId, jsonbinKey, customGet, customPut }
-
-    /* ===== Catalog (trimmed to keep file size reasonable; add rest as needed) ===== */
+    /* ===== Catalog with size options where applicable ===== */
     const catalog = [
-      {id:"ear-01", name:"German Silver Premium Quality Earings -a", price:400, cat:"Earrings", img:"assets/earrings images/E-1.jpeg"},
-      {id:"ring-01", name:"German Silver Premium Quality Free Size ring-a", price:390, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ban-01", name:"Oxides Fancy Bacchu Kada -a (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-1.jpeg"},
-      {id:"cc-01", name:"Navratri Chaniya choli-a", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-1.jpeg"}
-      // (… include full catalog from your previous file …)
+      // Jewellery
+      {id:"ear-01", name:"German Silver Premium Quality Earings -a ", price:400, cat:"Earrings", img:"assets/earrings images/E-1.jpeg "},
+      {id:"ear-02", name:"German Silver Premium Quality Earings -b ", price:420, cat:"Earrings", img:"assets/earrings images/E-2.jpeg "},
+      {id:"ear-03", name:"German Silver Premium Quality Earings -c ", price:420, cat:"Earrings", img:"assets/earrings images/E-3.jpeg "},
+      {id:"ear-04", name:"German Silver Premium Quality Earings -d ", price:600, cat:"Earrings", img:"assets/earrings images/E-4.jpeg "},
+      {id:"ear-05", name:"German Silver Premium Quality Earings -e ", price:420, cat:"Earrings", img:"assets/earrings images/E-5.jpeg "},
+      {id:"ear-06", name:"Oxides Fancy Earcup Earrings -a  ", price:340, cat:"Earrings", img:"assets/earrings images/E-6.jpeg "},
+      {id:"ear-07", name:"Oxides Fancy Earcup Earrings-b  ", price:340, cat:"Earrings", img:"assets/earrings images/E-7.jpeg "},
+      {id:"ear-08", name:"Oxides Fancy Earcup Earrings-c  ", price:340, cat:"Earrings", img:"assets/earrings images/E-8.jpeg "},
+      {id:"ear-09", name:"Oxides Fancy Earcup Earrings-d  ", price:340, cat:"Earrings", img:"assets/earrings images/E-9.jpeg "},
+      {id:"ear-10", name:"Oxides Fancy Earcup Earrings-e  ", price:340, cat:"Earrings", img:"assets/earrings images/E-10.jpeg "},
+
+
+
+      // Necklaces
+      {id:"neck-01", name:"German Silver Premium Quality Necklace-a", price:2080, cat:"Necklaces", img:"assets/necklaces images/N-1.jpeg"},
+      {id:"neck-02", name:"German Silver Premium Quality Necklace-b", price:1950, cat:"Necklaces", img:" assets/necklaces images/N-2.jpeg "},
+      {id:"neck-03", name:"German Silver Premium Quality Necklace-c ", price:2210, cat:"Necklaces", img:" assets/necklaces images/N-3.jpeg "},
+      {id:"neck-04", name:"Mehandi Polish brass premium Quality hasdi Necklace-a ", price:2700, cat:"Necklaces",img:" assets/necklaces images/N-4.jpeg "},
+      {id:"neck-05", name:"German Silver Premium Quality Necklace-d ", price:1700, cat:"Necklaces", img:" assets/necklaces images/N-5.jpeg "},
+      {id:"neck-06", name:"Mehandi Polish brass premium Quality Necklace -b", price:2860, cat:"Necklaces", img:"assets/necklaces images/N-6.jpeg  "},
+      {id:"neck-07", name:"German Silver Premium Quality Necklace-e  ", price:2499, cat:"Necklaces", img:" assets/necklaces images/N-7.jpeg "},
+      {id:"neck-08", name:"Afgani Choker Necklace-a ", price:700, cat:"Necklaces", img:" assets/necklaces images/N-8.jpeg "},
+      {id:"neck-09", name:"German Silver Premium Quality Necklace-f ", price:3770, cat:"Necklaces", img:" assets/necklaces images/N-9.jpeg "},
+      {id:"neck-10", name:"German Silver Premium Quality Necklace-g ", price:1950, cat:"Necklaces", img:"assets/necklaces images/N-10.jpeg "},
+      {id:"neck-11", name:"German Silver Premium Quality Necklace-h ", price:2860, cat:"Necklaces", img:" assets/necklaces images/N-11.jpeg"},
+      {id:"neck-12", name:"Afgani Choker Necklace-b ", price:700, cat:"Necklaces", img:"assets/necklaces images/N-12.jpeg "},
+      {id:"neck-13", name:"German Silver Premium Quality Necklace-i ", price:2160, cat:"Necklaces", img:"assets/necklaces images/N-13.jpeg "},
+      {id:"neck-14", name:"German Silver Premium Quality Necklace-j ", price:1550, cat:"Necklaces", img:"assets/necklaces images/N-14.jpeg "},
+      {id:"neck-15", name:"German Silver Premium Quality Necklace-k ",price:3120, cat:"Necklaces", img:"assets/necklaces images/N-15.jpeg "},
+      {id:"neck-16", name:"German Silver Premium Quality Necklace-L ", price:2270, cat:"Necklaces", img:"assets/necklaces images/N-16.jpeg"},
+      {id:"neck-17", name:"Afgani Choker Necklace-c ", price:700, cat:"Necklaces", img:"assets/necklaces images/N-17.jpeg "},
+      {id:"neck-18", name:"Afgani Long Necklace-d ", price: 910  , cat:"Necklaces", img:"assets/necklaces images/N-18.jpeg "},
+      {id:"neck-19", name:" Afgani Necklace-e ", price: 560  , cat:"Necklaces", img:"assets/necklaces images/N-19.jpeg "},
+      {id:"neck-20", name:" Ghoongru Choker Necklace-a ", price: 340  , cat:"Necklaces", img:"assets/necklaces images/N-20.jpeg "},
+      {id:"neck-21", name:" Ghoongru Choker Necklace-b  ", price: 340  , cat:"Necklaces", img:"assets/necklaces images/N-21.jpeg "},
+      {id:"neck-22", name:" Ghoongru Choker Necklace-c ", price:  340 , cat:"Necklaces", img:"assets/necklaces images/N-22.jpeg "},
+      {id:"neck-23", name:" Ghoongru Choker Necklace-d  ", price: 450  , cat:"Necklaces", img:"assets/necklaces images/N-23.jpeg "},
+      {id:"neck-24", name:" German Silver Premium Quality chain Pandal butti-a  ", price: 460 , cat:"Necklaces", img:"assets/necklaces images/N-24.jpeg "},
+      {id:"neck-25", name:" German Silver Premium Quality chain Pandal butti-b  ", price: 240 , cat:"Necklaces", img:"assets/necklaces images/N-25.jpeg "},
+      {id:"neck-26", name:" German Silver Premium Quality chain Pandal butti-c  ", price: 600 , cat:"Necklaces", img:"assets/necklaces images/N-26.jpeg "},
+      {id:"neck-27", name:" German Silver Premium Quality chain Pandal butti-d  ", price: 490 , cat:"Necklaces", img:"assets/necklaces images/N-27.jpeg "},
+      {id:"neck-28", name:" German Silver Premium Quality chain Pandal butti-e  ", price: 240 , cat:"Necklaces", img:"assets/necklaces images/N-28.jpeg "},
+      {id:"neck-29", name:" Ghoongru Choker Necklace-e  ", price: 340 , cat:"Necklaces", img:"assets/necklaces images/N-29.jpeg "},
+      {id:"neck-30", name:" German Silver Premium Quality chain Pandal butti-f  ", price: 420 , cat:"Necklaces", img:"assets/necklaces images/N-30.jpeg "},
+      {id:"neck-31", name:" German Silver Premium Quality chain Pandal butti-g  ", price: 560 , cat:"Necklaces", img:"assets/necklaces images/N-31.jpeg "},
+      {id:"neck-32", name:" German Silver Premium Quality chain Pandal butti-h ", price:  890 , cat:"Necklaces", img:"assets/necklaces images/N-32.jpeg "},
+      {id:"neck-33", name:" Oxides Choker Necklace-a ", price: 650 , cat:"Necklaces", img:"assets/necklaces images/N-33.jpeg "},
+      {id:"neck-34", name:" German Silver premium quality long necklace -a  ", price: 1610  , cat:"Necklaces", img:"assets/necklaces images/N-34.jpeg "},
+      {id:"neck-35", name:" Oxides Long Necklace -a  ", price: 220 , cat:"Necklaces", img:"assets/necklaces images/N-35.jpeg "},
+      {id:"neck-36", name:" Oxides Choker hasdi  Necklace-a ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-36.jpeg "},
+      {id:"neck-37", name:" Oxides Choker hasdi  Necklace-b  ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-37.jpeg "},
+      {id:"neck-38", name:" Oxides Long Necklace -b ", price:450 , cat:"Necklaces", img:"assets/necklaces images/N-38.jpeg "},
+      {id:"neck-39", name:" Oxides Choker hasdi  Necklace-c ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-39.jpeg "},
+      {id:"neck-40", name:" Handmade Navratri Special Long Necklace-a ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-40.jpeg "},
+      {id:"neck-41", name:" Handmade Navratri Special Long Necklace-b  ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-41.jpeg "},
+      {id:"neck-42", name:" Oxides Choker hasdi  Necklace-d ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-42.jpeg "},
+      {id:"neck-43", name:" Handmade Navratri Special Long Necklace-c  ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-43.jpeg "},
+      {id:"neck-44", name:" Handmade Navratri Special Long Necklace-d ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-44.jpeg "},
+      {id:"neck-45", name:" Oxides Hasdi Necklace-a ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-45.jpeg "},
+      {id:"neck-46", name:" Handmade Navratri Special Long Necklace-e ", price: 140 , cat:"Necklaces", img:"assets/necklaces images/N-46.jpeg "},
+
+
+       // RINGS — with size buttons
+      {id:"ring-01", name:"German Silver Premium Quality Free Size ring-a ", price:390, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-02", name:"German Silver Premium Quality Free Size ring-b", price:200, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-03", name:"German Silver Premium Quality Free Size ring-c", price:200, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-04", name:"German Silver Premium Quality Free Size ring-d", price:200, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-05", name:"German Silver Premium Quality Free Size ring-e", price:200, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-06", name:"German Silver Premium Quality Free Size ring-f", price:650, cat:"Rings", img:"assets/Ring1_6_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+
+      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/800x600?text=Anklet+1"},
+
+      {id:"ban-01", name:"Oxides Fancy Bacchu Kada -a (pair)  ", price:450 , cat:"Bangles", img:"assets/images/bangles/B-1.jpeg   "},
+      {id:"ban-02", name:"Oxides Fancy Bacchu Kada -b (pair)  ", price:450 , cat:"Bangles", img:"assets/images/bangles/B-2.jpeg   "},
+      {id:"ban-03", name:"Oxides Fancy Bacchu Kada -c (pair)  ", price: 450 , cat:"Bangles", img:" assets/images/bangles/B-3.jpeg  "},
+      {id:"ban-04", name:"Oxides Fancy Bacchu Kada -d (pair)  ", price: 450 , cat:"Bangles", img:" assets/images/bangles/B-4.jpeg  "},
+      {id:"ban-05", name:" Oxides Fancy Bacchu Kada -e (pair)  ", price: 450 , cat:"Bangles", img:"assets/images/bangles/B-5.jpeg   "},
+      {id:"ban-06", name:" Oxides  Handmade Fancy free size Kada -a (pair)  ", price: 520   , cat:"Bangles", img:" assets/images/bangles/B-6.jpeg  "},
+      {id:"ban-07", name:" Oxides Fancy adjusted kada  -a (single) ", price: 240 , cat:"Bangles", img:"assets/images/bangles/B-7.jpeg  "},
+      {id:"ban-08", name:" Oxides  Handmade Fancy free size Kada -b (pair) ", price: 520 , cat:"Bangles", img:" assets/images/bangles/B-8.jpeg  "},
+      {id:"ban-09", name:"Thread Work Handmade Bangles Colour Meroon -a (size :24.26.28)  ", price: 740   , cat:"Bangles", img:"assets/images/bangles/B-9.jpeg   "},
+      {id:"ban-10", name:"Thread Work Handmade Bangles Colour multi colour-b (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-10.jpeg  "},
+      {id:"ban-11", name:" Thread Work Handmade Bangles Colour Cream-c (Size : 24.26.28) ", price:740   , cat:"Bangles", img:" assets/images/bangles/B-11.jpeg  "},
+      {id:"ban-12", name:" Thread Work Handmade Bangles Colour Yellow-d (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-12.jpeg  "},
+      {id:"ban-13", name:" Thread Work Handmade Bangles Colour Black-e (Size : 24.26.28) ", price: 740  , cat:"Bangles", img:" assets/images/bangles/B-13.jpeg  "},
+      {id:"ban-14", name:" Thread Work Handmade Bangles Colour Morepich-f (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-14.jpeg  "},
+      {id:"ban-15", name:" Thread Work Handmade Bangles Colour Yellow-dd(Size : 24.26.28) ", price: 740  , cat:"Bangles", img:" assets/images/bangles/B-15.jpeg  "},
+      {id:"ban-16", name:" Oxides Fancy Bacchu Kada -f (pair)  ", price: 340   , cat:"Bangles", img:" assets/images/bangles/B-16.jpeg  "},
+      {id:"ban-17", name:" Oxides Fancy Bacchu Kada -g (pair)  ", price: 450  , cat:"Bangles", img:" assets/images/bangles/B-17.jpeg  "},
+      {id:"ban-18", name:" Oxides Fancy Bacchu Kada -h (pair)  ", price: 340  , cat:"Bangles", img:" assets/images/bangles/B-18.jpeg  "},
+      {id:"ban-19", name:" Oxides Fancy Bacchu Kada -i (pair)  ", price: 340 , cat:"Bangles", img:" assets/images/bangles/B-19.jpeg   "},
+      {id:"ban-20", name:" Oxides Fancy Bacchu Kada -j (pair) ", price:  450 , cat:"Bangles", img:" assets/images/bangles/B-20.jpeg  "},
+     
+ 
+
+      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
+      
+
+      // Traditional Clothing — sizes default to S/M/L/XL/XXL
+      {id:"cc-01", name:"Navratri Chaniya choli-a", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-1.jpeg"},
+      {id:"cc-02", name:"Navratri Chaniya choli-b ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-2.jpeg "},
+      {id:"cc-03", name:"Navratri Chaniya choli-c ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-3.jpeg "},
+      {id:"cc-04", name:"Navratri Chaniya choli-d ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-4.jpeg "},
+      {id:"cc-05", name:"Navratri Chaniya choli-e ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-5.jpeg "},
+      {id:"cc-06", name:"Navratri Chaniya choli-f ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-6.jpeg "},
+      {id:"cc-07", name:"Navratri Chaniya choli-g ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-7.jpeg "},
+      {id:"cc-08", name:"Navratri Chaniya choli-h ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-8.jpeg "},
+      {id:"cc-09", name:"Navratri Chaniya choli-i ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-9.jpeg "},
+      {id:"cc-10", name:"Navratri Chaniya choli-j ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-10.jpeg "},
+      {id:"cc-11", name:"Navratri Chaniya choli-k ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-11.jpeg "},
+      {id:"cc-12", name:"Navratri Chaniya choli-l ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-12.jpeg "},
+      {id:"cc-13", name:"Navratri Chaniya choli-m ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-13.jpeg "},
+      {id:"cc-14", name:"Navratri Chaniya choli-n ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-14.jpeg "},
+      {id:"cc-15", name:"Navratri Chaniya choli-o ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-15.jpeg "},
+      {id:"cc-16", name:"Navratri Chaniya choli-p ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-16.jpeg "},
+       {id:"cc-17", name:"Navratri Chaniya choli-q ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-17.jpeg "},
+       {id:"cc-18", name:"Navratri Chaniya choli-r ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-18.jpeg "},
+       {id:"cc-19", name:"Navratri Chaniya choli-s ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-19.jpeg "},
+       {id:"cc-20", name:"Navratri Chaniya choli-t ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-20.jpeg "},
+       {id:"cc-21", name:"Navratri Chaniya choli-u ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-21.jpeg "},
+       {id:"cc-22", name:"Navratri Chaniya choli-v ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-22.jpeg "},
+       {id:"cc-23", name:"Navratri Chaniya choli-w ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-23.jpeg "},
+       {id:"cc-24", name:"Navratri Chaniya choli-x ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-24.jpeg "},
+       {id:"cc-25", name:"Navratri Chaniya choli-y", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-25.jpeg "},
+       {id:"cc-26", name:"Navratri Chaniya choli-z ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-26.jpeg "},
+       {id:"cc-27", name:"Navratri Chaniya choli-aa ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-27.jpeg "},
+       {id:"cc-28", name:"Navratri Chaniya choli-ab ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-28.jpeg "},
+       {id:"cc-29", name:"Navratri Chaniya choli-ac ", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-29.jpeg "},  
+       {id:"cc-30", name:"Navratri Chaniya choli-ad ", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-30.jpeg "},
+       {id:"cc-31", name:"Navratri Chaniya choli-ae ", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-31.jpeg "},
+       {id:"cc-32", name:"Navratri Chaniya choli-af ", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-32.jpeg "},
+       {id:"cc-33", name:"Navratri Chaniya choli-ag ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-33.jpeg "},
+
+
+
+
+
+      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/800x600?text=Kurti+1"},
+      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
     ];
 
-    // Default sizes if product has none
+    // Default sizes for categories (used when a product has no explicit sizes)
     const DEFAULT_SIZES = {
-      "Chaniya Choli": ["Free Size","S","M","L","XL","XXL"],
-      "Kurtis": ["Free Size","S","M","L","XL","XXL"],
-      "Kurta": ["Free Size","S","M","L","XL","XXL"],
-      "Bangles": ["Free Size","2.2","2.4","2.6","2.8","2.10","2.12"]
+      "Chaniya Choli": [ "Free Size","S","M","L","XL","XXL"], 
+      "Kurtis": [ "Free Size","S","M","L","XL","XXL"],
+      "Kurta": [ "Free Size","S","M","L","XL","XXL"],
+      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"] // added per your spec
     };
 
-    // Selected size per product
-    const selectedSize = new Map();
+    /* ===== State for per-product selected size ===== */
+    const selectedSize = new Map(); // key: productId, value: size
 
-    /* ==============================
-       SYNC HELPERS (Cloud)
-       ============================== */
-    const statusbar   = document.getElementById('statusbar');
-    const syncStateEl = document.getElementById('syncState');
-    const statusMsgEl = document.getElementById('statusMsg');
-
-    function getSync(){
-      try{ return JSON.parse(localStorage.getItem(SYNC_KEY)||'{}'); }catch{ return {}; }
-    }
-    function setSync(v){ localStorage.setItem(SYNC_KEY, JSON.stringify(v||{})); updateSyncBadge(); }
-
-    function updateSyncBadge(){
-      statusbar.hidden = false;
-      const s = getSync();
-      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
-        syncStateEl.textContent = 'Sync: JSONBin';
-        syncStateEl.className = 'pill good';
-      }else if(s.provider === 'custom' && s.customGet && s.customPut){
-        syncStateEl.textContent = 'Sync: Custom';
-        syncStateEl.className = 'pill good';
-      }else{
-        syncStateEl.textContent = 'Sync: Local only';
-        syncStateEl.className = 'pill info';
-      }
-    }
-    function setStatus(msg, type='info'){ statusMsgEl.textContent = msg||''; }
-
-    async function fetchRemoteInv(){
-      const s = getSync();
-      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
-        const url = `https://api.jsonbin.io/v3/b/${encodeURIComponent(s.jsonbinId)}`;
-        const res = await fetch(url, { headers: { 'X-Master-Key': s.jsonbinKey, 'X-Bin-Meta': 'false' } });
-        if(!res.ok) throw new Error('JSONBin GET failed: '+res.status);
-        return await res.json();
-      } else if(s.provider === 'custom' && s.customGet){
-        const res = await fetch(s.customGet, { cache:'no-store' });
-        if(!res.ok) throw new Error('Custom GET failed: '+res.status);
-        return await res.json();
-      } else {
-        throw new Error('Remote sync not configured');
-      }
-    }
-
-    async function pushRemoteInv(obj){
-      const s = getSync();
-      const body = JSON.stringify(obj||{});
-      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
-        const url = `https://api.jsonbin.io/v3/b/${encodeURIComponent(s.jsonbinId)}`;
-        const res = await fetch(url, { method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Master-Key': s.jsonbinKey }, body });
-        if(!res.ok) throw new Error('JSONBin PUT failed: '+res.status);
-        return true;
-      } else if(s.provider === 'custom' && s.customPut){
-        const res = await fetch(s.customPut, { method:'PUT', headers:{ 'Content-Type':'application/json' }, body });
-        if(!res.ok){
-          // try POST as fallback
-          const res2 = await fetch(s.customPut, { method:'POST', headers:{ 'Content-Type':'application/json' }, body });
-          if(!res2.ok) throw new Error('Custom PUT/POST failed: '+res.status+'/'+res2.status);
-        }
-        return true;
-      } else {
-        throw new Error('Remote sync not configured');
-      }
-    }
-
-    /* ==============================
-       INVENTORY HELPERS (Local + Cloud merge)
-       ============================== */
-    function loadInvLocal(){ try{ return JSON.parse(localStorage.getItem(INV_KEY) || '{}'); } catch{ return {}; } }
-    function saveInvLocal(inv){ localStorage.setItem(INV_KEY, JSON.stringify(inv||{})); }
-
-    async function loadInv(){
-      // Try remote first; if not configured or fails, fall back to local
-      try{
-        const remote = await fetchRemoteInv();
-        if(remote && typeof remote === 'object'){
-          saveInvLocal(remote);
-          setStatus('Loaded inventory from cloud.', 'good');
-          return remote;
-        }
-      }catch(err){ setStatus((err.message||'') + ' — using local inventory.'); }
-      return loadInvLocal();
-    }
-
-    async function saveInv(inv, {push=true}={}){
-      saveInvLocal(inv);
-      if(push){
-        try{ await pushRemoteInv(inv); setStatus('Inventory saved to cloud.', 'good'); }
-        catch(err){ setStatus('Saved locally. Cloud save failed: '+err.message, 'bad'); }
-      }
-    }
-
-    function sizeKeysFor(p){
-      const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
-      return sizes.length ? sizes : ['_']; // '_' means one-size/no-size
-    }
-    function productHasSizes(p){
-      const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
-      return sizes.length > 0;
-    }
-
-    async function getStock(pid, sizeKey){
-      const inv = await currentInv();
-      const v = inv?.[pid]?.[sizeKey ?? '_'];
-      if (v === undefined || v === null || v === '') return Infinity; // blank/undefined => unlimited
-      const n = Number(v);
-      return Number.isFinite(n) ? n : Infinity;
-    }
-
-    function setStockLocal(inv, pid, sizeKey, qty){
-      inv[pid] = inv[pid] || {};
-      inv[pid][sizeKey] = (qty === '' || qty === null) ? null : Number(qty);
-    }
-
-    // cached in‑memory to avoid re‑fetch on every getStock
-    let INV_CACHE = null;
-    async function currentInv(){ if(!INV_CACHE) INV_CACHE = await loadInv(); return INV_CACHE; }
-    function invalidateInv(){ INV_CACHE = null; }
-
-    /* ==============================
-       RENDER CATALOG
-       ============================== */
-    async function renderCatalog(){
-      // Ensure inventory is loaded before rendering to correctly disable size chips
-      await currentInv();
-      document.querySelectorAll('[data-grid]').forEach(g => g.innerHTML = "");
-      for(const p of catalog){
+    /* ===== Render Catalog by Subcategory ===== */
+    function renderCatalog(){
+      const groups = document.querySelectorAll('[data-grid]');
+      groups.forEach(g => g.innerHTML = "");
+      catalog.forEach(p => {
         const grid = document.querySelector(`[data-grid="${p.cat}"]`);
-        if(!grid) continue;
+        if(!grid) return;
 
         const card = document.createElement('div');
         card.className = 'card';
 
+        // Build size buttons (from explicit sizes or default by category)
         let sizeBlock = '';
-        const availSizes = sizeKeysFor(p);
+        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || [ ]);
         if (availSizes.length) {
-          const opts = await Promise.all(availSizes.map(async sz => {
-            const stock = await getStock(p.id, sz);
-            const disabled = stock === 0;
-            return `<button class="size-btn" data-size="${sz}" data-for="${p.id}" ${disabled?'disabled aria-disabled="true"':''} aria-pressed="${selectedSize.get(p.id)===sz}">
-              ${sz}<span class="stock-dot" aria-hidden="true"></span>
-            </button>`;
-          }));
-          const hint = (p.cat === "Bangles") ? "" : `<div class="size-hint"><strong>Currently Available Size:</strong> ${FREE_SIZE_LABEL}</div>`;
+         const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
           sizeBlock = `
             <div class="sizes" role="group" aria-label="Select size">
-              ${opts.join('')}
+              ${opts}
             </div>
-            ${hint}`;
+            <div class="size-hint"><strong> Currently Available Size:</strong> ${ FREE_SIZE_LABEL}</div>`;
         }
 
         card.innerHTML = `
@@ -556,15 +467,24 @@
             </div>
           </div>`;
         grid.appendChild(card);
-      }
+      });
     }
 
-    /* ==============================
-       CART (per size)
-       ============================== */
+    /* ===== Simple Bucket (Cart) with localStorage ===== */
+    const CART_KEY = 'nitya_cart_v3_sizes';
     const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+
     function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
-    function parseCartId(cid){ const [pid, size] = cid.split('__'); return {pid, size}; }
+    function addItem(id, qty=1){ cart[id] = (cart[id]||0)+qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function removeItem(id, qty=1){ if(!cart[id]) return; cart[id] -= qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
+
+    function parseCartId(cid){
+      // supports id or id__SIZE
+      const [pid, size] = cid.split('__');
+      return {pid, size};
+    }
+
     function cartItems(){
       return Object.entries(cart).map(([cid,q])=>{
         const {pid, size} = parseCartId(cid);
@@ -573,36 +493,9 @@
         return { ...base, cid, size, qty:q };
       }).filter(Boolean);
     }
-    function cartQtyFor(pid, size){
-      const cid = size ? `${pid}__${size}` : pid;
-      return cart[cid] || 0;
-    }
     function cartTotal(){ return cartItems().reduce((s,i)=> s + i.price*i.qty, 0); }
 
-    async function addItem(cid, qty=1){
-      const {pid, size} = parseCartId(cid);
-      const max = await getStock(pid, size || '_');
-      const now = cart[cid] || 0;
-      if (now + qty > max){
-        alert(max === Infinity ? 'Unlimited stock — unexpected cap' : `Only ${max} left for this size.`);
-        if (max > now){ cart[cid] = max; }
-        saveCart(); refresh(); return;
-      }
-      cart[cid] = now + qty;
-      if(cart[cid] <= 0) delete cart[cid];
-      saveCart(); refresh();
-    }
-    function removeItem(cid, qty=1){
-      if(!cart[cid]) return;
-      cart[cid] -= qty;
-      if(cart[cid] <= 0) delete cart[cid];
-      saveCart(); refresh();
-    }
-    function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
-
-    /* ==============================
-       UI REFRESH
-       ============================== */
+    /* ===== UI Refresh ===== */
     const bucketCount = document.getElementById('bucketCount');
     const bucketTotal = document.getElementById('bucketTotal');
     const bucketItemsEl = document.getElementById('bucketItems');
@@ -612,27 +505,11 @@
     const hiddenDetails = document.getElementById('order_details');
     const hiddenTotal = document.getElementById('order_total');
 
-    async function refresh(){
-      // refresh catalog buttons stock
-      const inv = await currentInv();
-      document.querySelectorAll('.size-btn').forEach(btn=>{
-        const pid = btn.getAttribute('data-for');
-        const sz  = btn.getAttribute('data-size');
-        const v = inv?.[pid]?.[sz];
-        const stock = (v===undefined||v===null||v==='')?Infinity:Number(v);
-        if (stock === 0){
-          btn.setAttribute('disabled','true');
-          btn.setAttribute('aria-disabled','true');
-        } else {
-          btn.removeAttribute('disabled');
-          btn.removeAttribute('aria-disabled');
-        }
-      });
-
+    function refresh(){
       const items = cartItems();
       const total = cartTotal();
       bucketCount.textContent = items.reduce((s,i)=>s+i.qty,0);
-      document.getElementById('bucketItems')?.textContent = bucketCount.textContent;
+      bucketItemsEl.textContent = bucketCount.textContent;
       bucketTotal.textContent = `₹${total.toLocaleString()}`;
       grandTotal.textContent = `₹${total.toLocaleString()}`;
 
@@ -641,14 +518,11 @@
         const row = document.createElement('div');
         row.className = 'cart-item';
         const sizeText = it.size ? ` <span class="small">(Size ${it.size})</span>` : '';
-        const leftVal = (inv?.[it.id]?.[it.size||'_']);
-        const left = (leftVal===undefined||leftVal===null||leftVal==='')?Infinity:Number(leftVal);
-        const remaining = (left===Infinity) ? '∞' : (left - it.qty);
         row.innerHTML = `
           <img src="${it.img}" alt="${it.name}">
           <div>
             <div class="title">${it.name}${sizeText}</div>
-            <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()} • Left: ${remaining < 0 ? 0 : remaining}</div>
+            <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()}</div>
           </div>
           <div>
             <button class="btn" onclick="addItem('${it.cid}',1)">+1</button>
@@ -657,6 +531,7 @@
         cartList.appendChild(row);
       });
 
+      // FIXED: no raw newline inside string literals
       const lines = items.map(it => `• ${it.name}${it.size ? ' (Size ' + it.size + ')' : ''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
       const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
       orderSummary.value = summaryText;
@@ -666,13 +541,10 @@
       updateUpi(total);
     }
 
-    /* ==============================
-       EVENTS: Size/Cart
-       ============================== */
-    document.addEventListener('click', async (e)=>{
+    /* ===== Size button selection & add/remove events ===== */
+    document.addEventListener('click', (e)=>{
       const sizeBtn = e.target.closest('.size-btn');
       if(sizeBtn){
-        if(sizeBtn.hasAttribute('disabled')) return;
         const pid = sizeBtn.getAttribute('data-for');
         const sz = sizeBtn.getAttribute('data-size');
         selectedSize.set(pid, sz);
@@ -687,26 +559,20 @@
       if(add){
         const pid = add.dataset.add;
         const product = catalog.find(p=>p.id===pid);
-        const needSizes = productHasSizes(product);
-        if(needSizes){
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
-          const left = await getStock(pid, sel);
-          const inCart = cartQtyFor(pid, sel);
-          if (inCart + 1 > left){ alert(left===Infinity?'':'Only '+left+' left for this size.'); return; }
           addItem(`${pid}__${sel}`,1);
         }else{
-          const left = await getStock(pid, '_');
-          const inCart = cartQtyFor(pid, null);
-          if (inCart + 1 > left){ alert(left===Infinity?'':'Only '+left+' left.'); return; }
           addItem(pid,1);
         }
       }
       if(rem){
         const pid = rem.dataset.remove;
         const product = catalog.find(p=>p.id===pid);
-        const needSizes = productHasSizes(product);
-        if(needSizes){
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Select a size to remove.'); return; }
           removeItem(`${pid}__${sel}`,1);
@@ -716,9 +582,7 @@
       }
     });
 
-    /* ==============================
-       DRAWER + ORDER + UPI
-       ============================== */
+    /* ===== Drawer (Bucket) ===== */
     const drawer = document.getElementById('drawer');
     document.getElementById('openBucket').addEventListener('click', ()=>drawer.classList.add('open'));
     document.getElementById('closeBucket').addEventListener('click', ()=>drawer.classList.remove('open'));
@@ -726,6 +590,7 @@
     document.getElementById('goOrder').addEventListener('click', ()=>drawer.classList.remove('open'));
     document.getElementById('clearBucket').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
 
+    /* ===== UPI generation (Deep Link + QR) ===== */
     const upiDeepLink = document.getElementById('upiDeepLink');
     const qrBox = document.getElementById('qrBox');
     const copyUpiBtn = document.getElementById('copyUpi');
@@ -741,14 +606,17 @@
       const src = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${data}`;
       qrBox.innerHTML = `<img alt="UPI QR Code" width="220" height="220" style="width:100%;height:100%;object-fit:contain" src="${src}">`;
     }
+
     copyUpiBtn.addEventListener('click', ()=>{
       navigator.clipboard.writeText(UPI_ID).then(()=>{
         copyUpiBtn.textContent='Copied!';
         setTimeout(()=>copyUpiBtn.textContent='Copy',1200);
       });
     });
+
     refreshQR.addEventListener('click', ()=> updateUpi(cartTotal()));
 
+    /* ===== WhatsApp share ===== */
     const sendWhatsApp = document.getElementById('sendWhatsApp');
     sendWhatsApp.addEventListener('click', ()=>{
       const name = document.getElementById('custName').value || '(No name)';
@@ -763,184 +631,274 @@
       window.open(url,'_blank','noopener');
     });
 
+    /* ===== Form validation (basic) ===== */
     document.getElementById('orderForm').addEventListener('submit', (e)=>{
       if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
       if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10-digit mobile number.'); return; }
     });
 
-    /* ==============================
-       ADMIN INVENTORY MODAL
-       ============================== */
-    const adminBtn = document.getElementById('openAdmin');
-    const adminModal = document.getElementById('adminModal');
-    const closeAdminBtn = document.getElementById('closeAdmin');
-    const productPick = document.getElementById('productPick');
-    const sizesEditor = document.getElementById('sizesEditor');
-    const saveInvBtn = document.getElementById('saveInv');
-    const exportBtn = document.getElementById('exportJson');
-    const importBtn = document.getElementById('importJson');
-    const resetInvBtn = document.getElementById('resetInv');
-    const pullCloudBtn = document.getElementById('pullCloud');
-    const pushCloudBtn = document.getElementById('pushCloud');
+    // Init
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    renderCatalog();
+    refresh();
+  </script>
+<div class="drawer" id="inventoryDrawer" role="dialog" aria-modal="true" aria-labelledby="invTitle" style="border-left-color:#14532d">
+  <header class="wrap" style="padding:12px 16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+      <h4 id="invTitle">Inventory (manual)</h4>
+      <button class="btn" id="closeInventory">Close ✕</button>
+    </div>
+  </header>
+  <div class="body pad">
+    <p class="muted" style="margin-top:0">
+      Paste/edit JSON below and click <strong>Save</strong>. Tip: press <code class="kbd">Shift</code>+<code class="kbd">I</code> anywhere to open this quickly.
+    </p>
+    <textarea id="inventoryJson" style="width:100%;min-height:280px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"></textarea>
+    <div class="actions" style="margin-top:12px;display:flex;gap:8px;align-items:center">
+      <button class="cta" id="saveInventory">Save</button>
+      <button class="btn" id="reloadInventory" type="button">Reload</button>
+      <button class="btn" id="resetInventory" type="button">Reset to defaults</button>
+      <label style="display:flex;align-items:center;gap:8px;margin-left:auto">
+        <input type="checkbox" id="deductOnSubmit" />
+        Deduct stock on email submit
+      </label>
+    </div>
+  </div>
+</div>
+<script>
+/* ===== INVENTORY (per product and per size) — no API, saved in localStorage ===== */
+(function(){
+  const INVENTORY_KEY = 'nitya_inventory_v1';
+  const DEDUCT_FLAG_KEY = 'nitya_inventory_deduct_on_submit_v1';
 
-    function openAdmin(){
-      const code = prompt('Enter admin passcode to edit inventory:');
-      if(code !== ADMIN_PASS){ alert('Wrong passcode.'); return; }
-      productPick.innerHTML = catalog.map(p=>`<option value="${p.id}">${p.name} — [${p.cat}]</option>`).join('');
-      renderSizeInputs(productPick.value);
-      adminModal.classList.add('open');
-      adminModal.setAttribute('aria-hidden','false');
+  const defaultInventory = {
+    "ring-01": { sizes: { "Free Size": 5, "6": 2, "7": 0, "8": 3 } },
+    "ban-09":  { sizes: { "2.4": 10, "2.6": 0, "2.8": 4, "2.10": 1, "2.12": 0 } },
+    "cc-01":   { sizes: { "S": 1, "M": 2, "L": 0, "XL": 1, "XXL": 0, "Free Size": 3 } },
+    "ear-01":  { stock: 12 }
+  };
+
+  function loadInventory(){
+    try {
+      const raw = localStorage.getItem(INVENTORY_KEY);
+      return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultInventory));
+    } catch(e){
+      return JSON.parse(JSON.stringify(defaultInventory));
     }
-    function closeAdmin(){
-      adminModal.classList.remove('open');
-      adminModal.setAttribute('aria-hidden','true');
+  }
+  function saveInventory(inv){
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv));
+  }
+  let INVENTORY = loadInventory();
+
+  function loadDeductFlag(){ return localStorage.getItem(DEDUCT_FLAG_KEY) === '1'; }
+  function saveDeductFlag(v){ localStorage.setItem(DEDUCT_FLAG_KEY, v ? '1' : '0'); }
+
+  // Helpers
+  window.getStock = function(pid, size){
+    const item = INVENTORY[pid];
+    if(!item) return Infinity;
+    if(item.stock != null && size == null) return item.stock;
+    if(item.sizes && size != null && item.sizes[size] != null) return item.sizes[size];
+    if(item.sizes && size != null) return 0;
+    if(item.stock != null) return item.stock;
+    return Infinity;
+  };
+  window.setStock = function(pid, size, newQty){
+    if(!INVENTORY[pid]) INVENTORY[pid] = size ? { sizes:{} } : { stock:0 };
+    if(size){
+      if(!INVENTORY[pid].sizes) INVENTORY[pid].sizes = {};
+      INVENTORY[pid].sizes[size] = Math.max(0, Number(newQty||0));
+    }else{
+      INVENTORY[pid].stock = Math.max(0, Number(newQty||0));
     }
-    adminBtn.addEventListener('click', openAdmin);
-    closeAdminBtn.addEventListener('click', closeAdmin);
-    adminModal.addEventListener('click', (e)=>{ if(e.target === adminModal) closeAdmin(); });
+    saveInventory(INVENTORY);
+  };
+  window.decreaseStock = function(pid, size, qty){
+    const current = window.getStock(pid, size);
+    if(current === Infinity) return;
+    window.setStock(pid, size, Math.max(0, current - qty));
+  };
+  window.inCartQty = window.inCartQty || function(){ return 0; }; // will be overridden if exists elsewhere
+  window.canAddOne = function(pid, size){
+    const stk = window.getStock(pid, size);
+    if(stk === Infinity) return true;
+    const inCart = (typeof window.inCartQty === 'function') ? window.inCartQty(pid, size) : 0;
+    return inCart + 1 <= stk;
+  };
 
-    productPick.addEventListener('change', ()=> renderSizeInputs(productPick.value));
+  // Wire up Inventory admin drawer
+  document.addEventListener('DOMContentLoaded', function(){
+    const invDrawer = document.getElementById('inventoryDrawer');
+    const openInv = document.getElementById('openInventory');
+    const closeInv = document.getElementById('closeInventory');
+    const invText = document.getElementById('inventoryJson');
+    const saveInvBtn = document.getElementById('saveInventory');
+    const reloadInvBtn = document.getElementById('reloadInventory');
+    const resetInvBtn = document.getElementById('resetInventory');
+    const deductChk = document.getElementById('deductOnSubmit');
 
-    async function renderSizeInputs(pid){
-      const inv = await currentInv();
-      sizesEditor.innerHTML = '';
-      const p = catalog.find(x=>x.id===pid);
-      const keys = sizeKeysFor(p);
-      const obj = inv[pid] || {};
-      keys.forEach(k=>{
-        const val = (obj[k] ?? '');
-        const label = (k === '_') ? 'No size' : k;
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.innerHTML = `
-          <div style="font-weight:700;margin-bottom:6px">${label}</div>
-          <input type="number" min="0" step="1" inputmode="numeric" data-sizekey="${k}" placeholder="blank = unlimited" value="${val === null ? '' : val}">
-        `;
-        sizesEditor.appendChild(cell);
-      });
+    function openInventoryUI(){
+      if(!invDrawer) return;
+      invText.value = JSON.stringify(INVENTORY, null, 2);
+      if(deductChk) deductChk.checked = loadDeductFlag();
+      invDrawer.classList.add('open');
     }
+    function closeInventoryUI(){ if(invDrawer) invDrawer.classList.remove('open'); }
 
-    saveInvBtn.addEventListener('click', async ()=>{
-      const pid = productPick.value;
-      const inv = await currentInv();
-      const inputs = sizesEditor.querySelectorAll('input[data-sizekey]');
-      inputs.forEach(inp=>{
-        const k = inp.getAttribute('data-sizekey');
-        const v = inp.value;
-        setStockLocal(inv, pid, k, v === '' ? null : Math.max(0, parseInt(v,10) || 0));
-      });
-      await saveInv(inv, {push:true});
-      alert('Inventory saved for '+pid);
-      invalidateInv();
-      await renderCatalog();
-      await refresh();
-      await renderSizeInputs(productPick.value);
-    });
-
-    exportBtn.addEventListener('click', async ()=>{
-      const inv = await currentInv();
-      const blob = new Blob([JSON.stringify(inv,null,2)], {type:'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'nitya-inventory.json';
-      document.body.appendChild(a); a.click(); a.remove();
-    });
-
-    importBtn.addEventListener('click', ()=>{
-      const inp = document.createElement('input');
-      inp.type='file'; inp.accept='.json,application/json';
-      inp.onchange = async ()=>{
-        const f = inp.files[0]; if(!f) return;
-        const reader = new FileReader();
-        reader.onload = async ()=>{
-          try{
-            const obj = JSON.parse(reader.result);
-            if(typeof obj !== 'object') throw new Error('Invalid JSON');
-            await saveInv(obj, {push:true});
-            alert('Inventory imported and pushed to cloud.');
-            invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value);
-          }catch(err){ alert('Import failed: '+err.message); }
-        };
-        reader.readAsText(f);
-      };
-      inp.click();
-    });
-
-    resetInvBtn.addEventListener('click', async ()=>{
-      if(confirm('Clear ALL saved stock values? This will make everything unlimited.')){
-        const obj = {};
-        await saveInv(obj, {push:true});
-        alert('Inventory cleared.');
-        invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value);
+    if(openInv) openInv.addEventListener('click', openInventoryUI);
+    if(closeInv) closeInv.addEventListener('click', closeInventoryUI);
+    if(reloadInvBtn) reloadInvBtn.addEventListener('click', ()=> invText.value = JSON.stringify(INVENTORY, null, 2));
+    if(resetInvBtn) resetInvBtn.addEventListener('click', ()=>{
+      if(confirm('Reset inventory to defaults? This overwrites current stock.')){
+        INVENTORY = JSON.parse(JSON.stringify(defaultInventory));
+        saveInventory(INVENTORY);
+        invText.value = JSON.stringify(INVENTORY, null, 2);
+        try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
       }
     });
-
-    pullCloudBtn.addEventListener('click', async ()=>{
-      try{ const remote = await fetchRemoteInv(); saveInvLocal(remote); invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value); alert('Pulled latest inventory from cloud.'); }
-      catch(err){ alert('Pull failed: '+err.message); }
+    if(saveInvBtn) saveInvBtn.addEventListener('click', ()=>{
+      try{
+        const parsed = JSON.parse(invText.value);
+        INVENTORY = parsed;
+        saveInventory(INVENTORY);
+        if(deductChk) saveDeductFlag(deductChk.checked);
+        try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
+        alert('Inventory saved.');
+      }catch(err){
+        alert('Invalid JSON. Please fix and try again.');
+      }
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.shiftKey && (e.key.toLowerCase() === 'i')){ e.preventDefault(); openInventoryUI(); }
     });
 
-    pushCloudBtn.addEventListener('click', async ()=>{
-      try{ const inv = await currentInv(); await pushRemoteInv(inv); alert('Pushed local inventory to cloud.'); }
-      catch(err){ alert('Push failed: '+err.message); }
-    });
-
-    /* ==============================
-       SYNC SETTINGS MODAL
-       ============================== */
-    const openSyncBtn = document.getElementById('openSync');
-    const syncModal = document.getElementById('syncModal');
-    const closeSyncBtn = document.getElementById('closeSync');
-    const saveSyncBtn = document.getElementById('saveSync');
-    const testSyncBtn = document.getElementById('testSync');
-
-    const syncProvider = document.getElementById('syncProvider');
-    const jsonbinId = document.getElementById('jsonbinId');
-    const jsonbinKey = document.getElementById('jsonbinKey');
-    const customGet = document.getElementById('customGet');
-    const customPut = document.getElementById('customPut');
-
-    function openSync(){
-      const s = getSync();
-      syncProvider.value = s.provider || 'jsonbin';
-      jsonbinId.value = s.jsonbinId || '';
-      jsonbinKey.value = s.jsonbinKey || '';
-      customGet.value = s.customGet || '';
-      customPut.value = s.customPut || '';
-      syncModal.classList.add('open');
-      syncModal.setAttribute('aria-hidden','false');
+    // Hook into order submit to optionally deduct stock
+    const orderForm = document.getElementById('orderForm');
+    if(orderForm){
+      orderForm.addEventListener('submit', function(){
+        if(loadDeductFlag() && typeof window.cartItems === 'function'){
+          const items = window.cartItems();
+          items.forEach(it => {
+            window.decreaseStock(it.id, it.size || null, it.qty);
+          });
+          saveInventory(INVENTORY);
+          try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
+          if(typeof window.clearCart === 'function') window.clearCart();
+        }
+      }, { capture: true });
     }
-    function closeSync(){ syncModal.classList.remove('open'); syncModal.setAttribute('aria-hidden','true'); }
+  });
 
-    openSyncBtn.addEventListener('click', openSync);
-    closeSyncBtn.addEventListener('click', closeSync);
-    syncModal.addEventListener('click', (e)=>{ if(e.target === syncModal) closeSync(); });
+  // Patch render of size buttons if renderCatalog exists later
+  const _origRender = window.renderCatalog;
+  window.renderCatalog = function(){
+    if(typeof _origRender === 'function') _origRender();
 
-    saveSyncBtn.addEventListener('click', ()=>{
-      const v = {
-        provider: syncProvider.value,
-        jsonbinId: jsonbinId.value.trim(),
-        jsonbinKey: jsonbinKey.value.trim(),
-        customGet: customGet.value.trim(),
-        customPut: customPut.value.trim()
-      };
-      setSync(v);
-      alert('Sync settings saved.');
+    // After original rendering, annotate size buttons with stock and disable OOS
+    const sizeBtns = document.querySelectorAll('.size-btn[data-for][data-size]');
+    sizeBtns.forEach(btn => {
+      const pid = btn.getAttribute('data-for');
+      const sz = btn.getAttribute('data-size');
+      const stk = window.getStock(pid, sz);
+      const base = sz;
+      const label = (stk === Infinity) ? base : (stk <= 0 ? `${base} (out)` : `${base} (${stk})`);
+      btn.innerText = label;
+      if(stk !== Infinity && stk <= 0){
+        btn.disabled = true;
+        btn.style.textDecoration = 'line-through';
+        btn.style.opacity = '.6';
+      }else{
+        btn.disabled = false;
+        btn.style.textDecoration = '';
+        btn.style.opacity = '';
+      }
     });
-
-    testSyncBtn.addEventListener('click', async ()=>{
-      try{ await fetchRemoteInv(); alert('Connection OK — able to read inventory.'); }
-      catch(err){ alert('Test failed: '+err.message); }
-    });
-
-    /* ==============================
-       INIT
-       ============================== */
-    document.getElementById('yr').textContent = new Date().getFullYear();
-    updateSyncBadge();
-
-    // initial load/paint
-    (async ()=>{ await renderCatalog(); await refresh(); })();
-  </script>
+  };
+})();
+</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
