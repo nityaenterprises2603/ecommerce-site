@@ -866,6 +866,19 @@
 <script>
 (() => {
   const w = window;
+  // Import config from URL params (for quick setup): ?bin=BIN_ID&key=MASTER_KEY&endpoint=URL&auth=BEARER...
+  (function applyConfigFromQuery(){
+    try{
+      const sp = new URLSearchParams(location.search);
+      const bin = sp.get("bin"); const key = sp.get("key");
+      const ep  = sp.get("endpoint"); const au = sp.get("auth");
+      if (bin){ localStorage.setItem("JSONBIN_BIN_ID", bin); w.JSONBIN_BIN_ID = bin; }
+      if (key){ localStorage.setItem("JSONBIN_MASTER_KEY", key); w.JSONBIN_MASTER_KEY = key; }
+      if (ep ){ localStorage.setItem("INVENTORY_URL", ep); w.INVENTORY_URL = ep; }
+      if (au ){ localStorage.setItem("INVENTORY_AUTH", au); w.INVENTORY_AUTH = au; }
+    }catch(e){ console.warn("URL param import failed", e); }
+  })();
+
 
   // ----------- Visible config (generic endpoint fallback) -----------
   if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = localStorage.getItem("INVENTORY_URL") || "";
@@ -988,6 +1001,10 @@
 
   // ----------- Public API (override existing if present) -----------
   async function initInventory(){
+    if (!hasJSONBin() && !hasRemote()){
+      setSyncStatus && setSyncStatus('not configured');
+      try{ openSettingsModal(); }catch(e){}
+    }
     setSyncStatus && setSyncStatus('loading...');
     // Start with local for instant UI
     w.INV_CACHE = loadInvLocal();
@@ -1143,7 +1160,7 @@
             <button id="inv-settings-close" style="border:0;background:#eee;border-radius:8px;padding:6px 8px;cursor:pointer">Close ✕</button>
           </header>
           <div style="padding:14px">
-            <p style="margin:0 0 10px;color:#555">Configure remote sync. Use <b>JSONBin</b> (recommended for Pages) or a <b>Custom Endpoint</b> (must handle CORS).</p>
+            <p style="margin:0 0 10px;color:#555">Configure remote sync. Use <b>JSONBin</b> (recommended for Pages) or a <b>Custom Endpoint</b> (must handle CORS). Tip: you can also append <code>?bin=...&key=...</code> to the URL to prefill.</p>
             <div style="display:grid;gap:10px">
               <label>JSONBin <b>Bin ID</b><br/><input id="f_jsonbin_id" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
               <label>JSONBin <b>Master Key</b><br/><input id="f_jsonbin_key" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
