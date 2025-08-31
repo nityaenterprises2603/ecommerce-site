@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nitya Enterprises — E-Commerce</title>
   <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
- 
   <style>
     :root{
       --maroon:#6A0D25;
@@ -305,47 +304,7 @@
       </div>
     </div>
   </div>
-(function () {
-      const VERSION = '2025-08-31-1'; // <— bump this on every deploy
-      const FLAG = 'cache_cleared_v_' + VERSION;
 
-      // 1) Append ?v=VERSION to local assets that may still be cached
-      const bump = (url) => {
-        try {
-          // Only bump same-origin or relative URLs
-          const u = new URL(url, location.href);
-          if (u.origin !== location.origin) return url;
-          u.searchParams.set('v', VERSION);
-          return u.pathname + u.search + u.hash;
-        } catch { return url; }
-      };
-
-      // Update <link rel="stylesheet"> and <script src>
-      document.querySelectorAll('link[rel="stylesheet"][href]').forEach(l => l.href = bump(l.getAttribute('href')));
-      document.querySelectorAll('script[src]').forEach(s => s.src = bump(s.getAttribute('src')));
-
-      // Optional: also bump your own images referenced in HTML
-      document.querySelectorAll('img[src]').forEach(i => i.src = bump(i.getAttribute('src')));
-
-      // 2) Unregister service workers & clear Cache Storage ONCE per version
-      if (!localStorage.getItem(FLAG)) {
-        const clearAll = async () => {
-          try {
-            if ('serviceWorker' in navigator) {
-              const regs = await navigator.serviceWorker.getRegistrations();
-              await Promise.all(regs.map(r => r.unregister()));
-            }
-            if ('caches' in window) {
-              const keys = await caches.keys();
-              await Promise.all(keys.map(k => caches.delete(k)));
-            }
-          } finally {
-            localStorage.setItem(FLAG, '1');
-          }
-        };
-        clearAll();
-      }
-    })();
   <script>
     /* ==============================
        CONFIG
@@ -497,7 +456,7 @@
       "Chaniya Choli": ["Free Size","S","M","L","XL","XXL"],
       "Kurtis": ["Free Size","S","M","L","XL","XXL"],
       "Kurta": ["Free Size","S","M","L","XL","XXL"],
-      "Bangles": ["Free Size","2.2","2.4","2.6","2.8","2.10","2.12"]
+      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"]
     };
 
     // Selected size per product
@@ -900,13 +859,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
