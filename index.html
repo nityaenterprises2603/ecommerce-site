@@ -786,18 +786,22 @@
     // Hook into order submit to optionally deduct stock
     const orderForm = document.getElementById('orderForm');
     if(orderForm){
-      orderForm.addEventListener('submit', function(){
+      orderForm.addEventListener('submit', function(e){
+        // If earlier validation blocked submission, do nothing
+        if (e.defaultPrevented) return;
         if(loadDeductFlag() && typeof window.cartItems === 'function'){
           const items = window.cartItems();
           items.forEach(it => {
             window.decreaseStock(it.id, it.size || null, it.qty);
           });
           saveInventory(INVENTORY);
-          try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
+          try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(err){}
+          // Optionally clear the cart AFTER submission click
           if(typeof window.clearCart === 'function') window.clearCart();
         }
-      }, { capture: true });
+      }); // bubble phase (after validation)
     }
+}
   });
 
   // Patch render of size buttons if renderCatalog exists later
