@@ -862,30 +862,26 @@
     refresh();
   </script>
 
-<!-- ===== Inventory Remote Sync: injected by ChatGPT ===== -->
+<!-- ===== Inventory Remote Sync (JSONBin-ready, with Settings & Migration) ===== -->
 <script>
 (() => {
-  // ===== JSONBin integration (plug-and-play) =====
-  // Fill these two values and you're done:
-  // 1) Create a free bin at https://jsonbin.io (or use an existing one).
-  // 2) Copy the Bin ID and your X-Master-Key, then paste below.
-  w.JSONBIN_BIN_ID = "68b3e91642be1c4f08a347e3";              // e.g., "66d1c0f4e41b4d34e4a2a123"
-  w.JSONBIN_MASTER_KEY = "$2a$10$CZkZKSX19iiTtO/.03ihxOTi2R/yGiCGYzdidVWgoN6JHmH8RYq0.";    // e.g., "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-  // ===============================================
-
-  // Don't crash if site doesn't have these yet
   const w = window;
 
-  // ---------- Config (override-ready) ----------
-  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "";         // ← put your JSON endpoint here
-  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "";       // ← optional: "Bearer <token>"
-  if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";   // local cache key
+  // ---------- User-visible config (generic fallback, optional) ----------
+  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "";  // leave empty if using JSONBin
+  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = ""; // optional for generic endpoints
+  if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";
+
+  // JSONBin credentials (can be filled via UI modal; also read from localStorage)
+  w.JSONBIN_BIN_ID = w.JSONBIN_BIN_ID || localStorage.getItem("JSONBIN_BIN_ID") || "";
+  w.JSONBIN_MASTER_KEY = w.JSONBIN_MASTER_KEY || localStorage.getItem("JSONBIN_MASTER_KEY") || "";
 
   // Keep a fast in-memory cache
   if (w.INV_CACHE === undefined) w.INV_CACHE = {};
   if (w.INV_DIRTY === undefined) w.INV_DIRTY = false;
 
   const hasRemote = () => !!(w.INVENTORY_URL && w.INVENTORY_URL.trim().length > 0);
+  const hasJSONBin = () => !!(w.JSONBIN_BIN_ID && w.JSONBIN_MASTER_KEY);
 
   // ---------- Local helpers ----------
   function loadInvLocal(){
@@ -896,16 +892,14 @@
     try { localStorage.setItem(w.INV_KEY, JSON.stringify(obj || {})); } catch {}
   }
 
-  // ---------- Remote helpers ----------
+  // ---------- Remote helpers (JSONBin first; fallback to generic) ----------
   async function fetchInvRemote(){
-    // Prefer JSONBin if configured
-    if (w.JSONBIN_BIN_ID && w.JSONBIN_MASTER_KEY){
+    if (hasJSONBin()){
       try{
         const url = `https://api.jsonbin.io/v3/b/${w.JSONBIN_BIN_ID}/latest`;
         const res = await fetch(url, { method:"GET", headers:{ "X-Master-Key": w.JSONBIN_MASTER_KEY } });
         if(!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-        // JSONBin v3 returns {record: {...}, metadata:{...}}
         const body = (data && data.record) || {};
         return body;
       }catch(e){
@@ -913,8 +907,6 @@
         return null;
       }
     }
-
-    // Generic remote (former behavior)
     if (!hasRemote()) return null;
     try{
       const res = await fetch(w.INVENTORY_URL, {
@@ -930,7 +922,278 @@
       console.warn("[RemoteInv] fetch failed, falling back to local:", e);
       return null;
     }
-  })();
+  }
+
+  async function pushInvRemote(obj){
+    if (hasJSONBin()){
+      try{
+        const url = `https://api.jsonbin.io/v3/b/${w.JSONBIN_BIN_ID}`;
+        const res = await fetch(url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json", "X-Master-Key": w.JSONBIN_MASTER_KEY },
+          body: JSON.stringify(obj || {})
+        });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        return true;
+      }catch(e){
+        console.warn("[JSONBin] push failed:", e);
+        return false;
+      }
+    }
+    if (!hasRemote()) return false;
+    try{
+      const headers = { "Content-Type": "application/json" };
+      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
+      let res = await fetch(w.INVENTORY_URL, { method:"PUT", headers, body: JSON.stringify(obj || {}) });
+      if (!res.ok){
+        res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
+      }
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return true;
+    }catch(e){
+      console.warn("[RemoteInv] push failed, keeping local copy:", e);
+      return false;
+    }
+  }
+
+  // ---------- Public API (override existing if present) ----------
+  async function initInventory(){
+    setSyncStatus && setSyncStatus('loading...');
+    // Start with local so UI isn't blank
+    w.INV_CACHE = loadInvLocal();
+
+    // Try remote; if OK, prefer it and persist locally
+    const remote = await fetchInvRemote();
+
+    const jsonbinConfigured = hasJSONBin();
+    const localHasData = w.INV_CACHE && Object.keys(w.INV_CACHE).length > 0;
+    const remoteHasData = remote && Object.keys(remote).length > 0;
+
+    if (remote && typeof remote === "object"){
+      if (remoteHasData){
+        w.INV_CACHE = remote;
+        saveInvLocal(w.INV_CACHE);
+        setSyncStatus && setSyncStatus('loaded from remote');
+      } else if (jsonbinConfigured && localHasData){
+        try{
+          const doMigrate = confirm("Remote inventory is empty. Upload your current local inventory so other devices can see it?");
+          if (doMigrate){
+            const ok = await pushInvRemote(w.INV_CACHE);
+            setSyncStatus && setSyncStatus(ok ? 'migrated local → remote' : 'migration failed');
+          } else {
+            setSyncStatus && setSyncStatus('using local only');
+          }
+        }catch(e){
+          console.warn("[RemoteInv] migration prompt error:", e);
+          setSyncStatus && setSyncStatus('migration skipped');
+        }
+      } else {
+        setSyncStatus && setSyncStatus('empty remote; no local data');
+      }
+    } else {
+      setSyncStatus && setSyncStatus('remote unavailable; using local');
+    }
+  }
+
+  // Keep the same names many codebases already call:
+  w.loadInv = function(){ return w.INV_CACHE || {}; };
+
+  w.saveInv = async function(inv){
+    w.INV_CACHE = inv || {};
+    saveInvLocal(w.INV_CACHE);
+    w.INV_DIRTY = true;
+    const ok = await pushInvRemote(w.INV_CACHE);
+    if (ok) w.INV_DIRTY = false;
+    setSyncStatus && setSyncStatus(ok ? 'pushed at ' + new Date().toLocaleTimeString() : 'push failed');
+    return true;
+  };
+
+  const originalSetStock = w.setStock;
+  w.setStock = function(pid, sizeKey, qty){
+    const inv = w.loadInv();
+    inv[pid] = inv[pid] || {};
+    inv[pid][sizeKey] = (qty === "" || qty === null || typeof qty === "undefined") ? null : Number(qty);
+    w.saveInv(inv);
+    if (typeof originalSetStock === "function" && originalSetStock !== w.setStock){
+      try { originalSetStock(pid, sizeKey, qty); } catch {}
+    }
+  };
+
+  w.forceSyncNow = async function(){
+    if (!hasJSONBin() && !hasRemote()){
+      alert("Remote sync not configured. Open Inventory Settings and fill JSONBin details or set INVENTORY_URL.");
+      return;
+    }
+    setSyncStatus && setSyncStatus('pushing...');
+    const ok = await pushInvRemote(w.loadInv());
+    setSyncStatus && setSyncStatus(ok ? 'pushed at ' + new Date().toLocaleTimeString() : 'push failed');
+    alert(ok ? "Inventory synced to remote." : "Sync failed. Check endpoint/token.");
+  };
+
+  // ---------- UI glue: buttons + status ----------
+  function ensureSyncButton(){
+    if (document.getElementById("chatgpt-sync-now")) return;
+    const btn = document.createElement("button");
+    btn.id = "chatgpt-sync-now";
+    btn.textContent = "Sync Inv";
+    btn.style.position = "fixed";
+    btn.style.right = "12px";
+    btn.style.bottom = "12px";
+    btn.style.zIndex = "9999";
+    btn.style.padding = "10px 14px";
+    btn.style.borderRadius = "10px";
+    btn.style.border = "1px solid rgba(0,0,0,.15)";
+    btn.style.background = "#fff";
+    btn.style.cursor = "pointer";
+    btn.title = "Sync inventory to remote JSON endpoint";
+    btn.addEventListener("click", () => w.forceSyncNow());
+    document.body.appendChild(btn);
+
+    // status badge
+    if (!document.getElementById("chatgpt-sync-status")){
+      const s = document.createElement("div");
+      s.id = "chatgpt-sync-status";
+      s.textContent = "Sync: idle";
+      s.style.position = "fixed";
+      s.style.right = "12px";
+      s.style.bottom = "54px";
+      s.style.zIndex = "9999";
+      s.style.padding = "8px 10px";
+      s.style.borderRadius = "10px";
+      s.style.border = "1px solid rgba(0,0,0,.15)";
+      s.style.background = "#fff";
+      s.style.fontSize = "12px";
+      s.style.color = "#333";
+      document.body.appendChild(s);
+    }
+  }
+
+  function setSyncStatus(txt){
+    const el = document.getElementById('chatgpt-sync-status');
+    if (el) el.textContent = 'Sync: ' + txt;
+  }
+
+  // ---------- Settings modal to paste JSONBin keys ----------
+  function ensureSettingsButton(){
+    if (document.getElementById("chatgpt-inv-settings")) return;
+    const btn = document.createElement("button");
+    btn.id = "chatgpt-inv-settings";
+    btn.textContent = "Inventory Settings";
+    btn.style.position = "fixed";
+    btn.style.right = "110px";
+    btn.style.bottom = "12px";
+    btn.style.zIndex = "9999";
+    btn.style.padding = "10px 14px";
+    btn.style.borderRadius = "10px";
+    btn.style.border = "1px solid rgba(0,0,0,.15)";
+    btn.style.background = "#fff";
+    btn.style.cursor = "pointer";
+    btn.title = "Set JSONBin Bin ID & Master Key";
+    btn.addEventListener("click", openModal);
+    document.body.appendChild(btn);
+  }
+
+  function buildSettingsModal(){
+    if (document.getElementById("inv-settings")) return;
+    const css = document.createElement('style');
+    css.textContent = `
+      #inv-settings-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);display:none;z-index:10000}
+      #inv-settings{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.2);width:min(520px,92vw);padding:16px;display:none;z-index:10001}
+      #inv-settings h3{margin:0 0 8px 0}
+      #inv-settings label{font-weight:600;display:block;margin:.5rem 0 .25rem}
+      #inv-settings input{width:100%;padding:10px 12px;border:1px solid #dadde1;border-radius:10px}
+      #inv-settings .row{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+      #inv-settings .btn{padding:10px 14px;border-radius:10px;border:1px solid rgba(0,0,0,.15);background:#f7f7f7;cursor:pointer}
+      #inv-settings .btn.primary{background:#14532d;color:#fff;border-color:#14532d}
+    `;
+    document.head.appendChild(css);
+
+    const bd = document.createElement('div');
+    bd.id = "inv-settings-backdrop";
+    const md = document.createElement('div');
+    md.id = "inv-settings";
+    md.setAttribute('role','dialog');
+    md.setAttribute('aria-modal','true');
+    md.innerHTML = `
+      <h3 id="inv-settings-title">Inventory Settings</h3>
+      <p style="margin-top:0;color:#555">Paste your <b>JSONBin Bin ID</b> and <b>X-Master-Key</b>. They’re stored only in your browser (localStorage).</p>
+      <label for="bin-id">Bin ID</label>
+      <input id="bin-id" type="text" placeholder="e.g. 66d1c0f4e41b4d34e4a2a123">
+      <label for="master-key">X-Master-Key</label>
+      <input id="master-key" type="password" placeholder="Paste your secret key">
+      <div class="row">
+        <button class="btn" id="inv-cancel">Cancel</button>
+        <button class="btn primary" id="inv-save">Save</button>
+      </div>
+    `;
+    document.body.appendChild(bd);
+    document.body.appendChild(md);
+
+    document.getElementById("inv-cancel").addEventListener("click", closeModal);
+    document.getElementById("inv-settings-backdrop").addEventListener("click", closeModal);
+    document.getElementById("inv-save").addEventListener("click", saveSettings);
+  }
+
+  function openModal(){
+    const bd = document.getElementById("inv-settings-backdrop");
+    const md = document.getElementById("inv-settings");
+    document.getElementById("bin-id").value = localStorage.getItem("JSONBIN_BIN_ID") || (w.JSONBIN_BIN_ID || "");
+    document.getElementById("master-key").value = localStorage.getItem("JSONBIN_MASTER_KEY") || (w.JSONBIN_MASTER_KEY || "");
+    bd.style.display = "block";
+    md.style.display = "block";
+  }
+  function closeModal(){
+    document.getElementById("inv-settings-backdrop").style.display = "none";
+    document.getElementById("inv-settings").style.display = "none";
+  }
+  function saveSettings(){
+    const id = document.getElementById("bin-id").value.trim();
+    const key = document.getElementById("master-key").value.trim();
+    if (!id || !key){ alert("Please fill both Bin ID and X-Master-Key."); return; }
+    localStorage.setItem("JSONBIN_BIN_ID", id);
+    localStorage.setItem("JSONBIN_MASTER_KEY", key);
+    w.JSONBIN_BIN_ID = id;
+    w.JSONBIN_MASTER_KEY = key;
+    closeModal();
+    alert("Saved. Inventory will now sync via JSONBin.");
+    if (typeof w.initInventory === "function"){
+      w.initInventory().then(()=>{
+        if (typeof w.renderCatalog === "function") try { w.renderCatalog(); } catch {}
+        if (typeof w.refresh === "function") try { w.refresh(); } catch {}
+      });
+    }
+  }
+
+  function applySavedKeys(){
+    const id = localStorage.getItem("JSONBIN_BIN_ID");
+    const key = localStorage.getItem("JSONBIN_MASTER_KEY");
+    if (id && key){
+      w.JSONBIN_BIN_ID = w.JSONBIN_BIN_ID || id;
+      w.JSONBIN_MASTER_KEY = w.JSONBIN_MASTER_KEY || key;
+    }
+  }
+
+  async function boot(){
+    try {
+      applySavedKeys();
+      await initInventory();
+      if (typeof w.renderCatalog === "function") try { w.renderCatalog(); } catch {}
+      if (typeof w.refresh === "function") try { w.refresh(); } catch {}
+    } catch(e){
+      console.warn("[RemoteInv] init error:", e);
+    } finally {
+      ensureSyncButton();
+      ensureSettingsButton();
+      buildSettingsModal();
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", boot);
+  } else {
+    setTimeout(boot, 0);
+  }
+})();
 </script>
 <!-- ===== /Inventory Remote Sync ===== -->
 </body>
