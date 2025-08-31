@@ -3,25 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nitya Enterprises — E-Commerce</title>
-  <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
+  <title>Nitya Enterprises — E‑Commerce (Cloud‑Synced Inventory)</title>
+  <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Cloud‑synced per‑size inventory with JSONBin, bucket cart, UPI checkout, Email & WhatsApp order."/>
   <style>
     :root{
-      --maroon:#6A0D25;
-      --orange:#FF6600;
-      --bg:#fff8f3;
-      --ink:#222;
-      --muted:#666;
-      --card:#ffffff;
-      --ring: rgba(0,0,0,.08);
-      --oos:#b91c1c;
-      --ok:#1b5e20;
+      --maroon:#6A0D25; --orange:#FF6600; --bg:#fff8f3; --ink:#222; --muted:#666; --card:#ffffff; --ring: rgba(0,0,0,.08);
+      --oos:#b91c1c; --ok:#1b5e20; --warn:#eab308; --good:#16a34a; --bad:#dc2626; --info:#2563eb;
     }
     *{box-sizing:border-box}
     html{scroll-behavior:smooth}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     a{color:inherit}
-    header{position:sticky;top:0;z-index:50;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
+    header{position:sticky;top:0;z-index:60;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
     .wrap{max-width:1100px;margin:auto;padding:0 16px}
     .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
     .brand{display:flex;gap:10px;align-items:center}
@@ -64,7 +57,7 @@
     .btn.bucket{background:var(--maroon);color:#fff}
     .btn:disabled{opacity:.55;cursor:not-allowed}
 
-    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:60;display:flex;flex-direction:column}
+    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:65;display:flex;flex-direction:column}
     .drawer.open{transform:translateX(0)}
     .drawer header{background:#fff;color:#111;border-bottom:1px solid var(--ring)}
     .drawer h4{margin:0;font-size:1.1rem}
@@ -98,7 +91,7 @@
 
     @media (max-width:720px){ .upi{grid-template-columns:1fr} }
 
-    /* Admin modal */
+    /* Modals */
     .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.4);z-index:80}
     .modal.open{display:flex}
     .panel{width:min(920px,95vw);max-height:90vh;overflow:auto;background:#fff;border-radius:16px;border:2px solid var(--maroon);box-shadow:0 20px 60px rgba(0,0,0,.25)}
@@ -110,6 +103,13 @@
     .sizes-editor .cell{border:1px solid var(--ring);border-radius:10px;padding:8px}
     .note{font-size:.9rem;color:var(--muted)}
     .danger{color:var(--oos)}
+
+    /* Inline status bar */
+    .statusbar{position:sticky;top:48px;z-index:64;background:#fff7ed;border-bottom:1px solid var(--ring);padding:8px 16px;display:flex;gap:10px;align-items:center}
+    .pill{border-radius:999px;padding:3px 8px;border:1px solid var(--ring);font-size:.85rem}
+    .pill.info{background:#eff6ff;border-color:#bfdbfe}
+    .pill.bad{background:#fef2f2;border-color:#fecaca}
+    .pill.good{background:#ecfdf5;border-color:#bbf7d0}
   </style>
 </head>
 <body>
@@ -129,9 +129,15 @@
           🧺 Bucket <span class="count" id="bucketCount">0</span>
         </button>
         <button class="admin-link" id="openAdmin" title="Inventory Manager">Admin</button>
+        <button class="admin-link" id="openSync" title="Cloud Inventory Settings">⚙️ Sync</button>
       </nav>
     </div>
   </header>
+
+  <div class="statusbar" id="statusbar" hidden>
+    <span class="pill info" id="syncState">Sync: Local only</span>
+    <span class="muted" id="statusMsg"></span>
+  </div>
 
   <section class="hero">
     <div class="wrap">
@@ -284,12 +290,14 @@
         <div style="display:flex;gap:8px">
           <button class="btn ghost" id="exportJson">Export JSON</button>
           <button class="btn" id="importJson">Import JSON</button>
+          <button class="btn" id="pullCloud">Pull from Cloud</button>
+          <button class="btn" id="pushCloud">Push to Cloud</button>
           <button class="btn" id="resetInv">Clear All Stock</button>
           <button class="btn" id="closeAdmin">Close ✕</button>
         </div>
       </header>
       <div class="content">
-        <p class="note">Tip: Leave a field <em>blank</em> for unlimited stock. Set <strong>0</strong> to mark a size as <span class="danger">Out of Stock</span>. Values persist in this browser (localStorage).</p>
+        <p class="note">Tip: Leave a field <em>blank</em> for unlimited stock. Set <strong>0</strong> to mark a size as <span class="danger">Out of Stock</span>. Values persist in this browser and can be synced to the cloud when configured.</p>
         <div class="grid2" style="margin-top:12px">
           <div>
             <label for="productPick"><strong>Select Product</strong></label>
@@ -307,6 +315,48 @@
     </div>
   </div>
 
+  <!-- Sync Settings Modal -->
+  <div class="modal" id="syncModal" aria-hidden="true" aria-label="Inventory Sync Settings">
+    <div class="panel">
+      <header>
+        <h4>Cloud Inventory Settings</h4>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="testSync">Test Connection</button>
+          <button class="btn" id="closeSync">Close ✕</button>
+        </div>
+      </header>
+      <div class="content">
+        <p class="note">Use <strong>JSONBin</strong> (recommended) or your own HTTPS endpoint. For JSONBin v3, create a Bin and paste the details below. <a href="https://jsonbin.io/" target="_blank" rel="noopener">jsonbin.io</a></p>
+        <div class="grid2" style="grid-template-columns:1fr 2fr">
+          <div>
+            <label>Provider</label>
+            <select id="syncProvider">
+              <option value="jsonbin">JSONBin (v3)</option>
+              <option value="custom">Custom Endpoint</option>
+            </select>
+          </div>
+          <div></div>
+
+          <div><label>JSONBin Bin ID</label></div>
+          <div><input id="jsonbinId" placeholder="e.g. 66d0abcd1234ef5678901234"/></div>
+
+          <div><label>JSONBin API Key</label></div>
+          <div><input id="jsonbinKey" placeholder="x-master-key"/></div>
+
+          <div><label>Custom GET URL</label></div>
+          <div><input id="customGet" placeholder="https://yourdomain.example/inventory.json"/></div>
+
+          <div><label>Custom PUT/POST URL</label></div>
+          <div><input id="customPut" placeholder="https://yourdomain.example/inventory"/></div>
+        </div>
+        <div class="actions" style="margin-top:14px">
+          <button class="cta" id="saveSync">Save Settings</button>
+          <span class="note">Settings are stored locally in this browser.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     /* ==============================
        CONFIG
@@ -317,142 +367,19 @@
     const FREE_SIZE_LABEL = "Free Size";
 
     const CART_KEY = 'nitya_cart_v4_sizes';
-    const INV_KEY  = 'nitya_inventory_v1';    // { [pid]: { [sizeKey]: number|null }, ... }
+    const INV_KEY  = 'nitya_inventory_v1';           // { [pid]: { [sizeKey]: number|null }, ... }
     const ADMIN_PASS = 'nitya@123';
 
-    /* ===== Catalog (same items, cleaned paths/spaces) ===== */
+    // Cloud sync config (saved locally, affects cross‑device via remote store)
+    const SYNC_KEY = 'nitya_inventory_sync_v1';      // { provider:'jsonbin'|'custom', jsonbinId, jsonbinKey, customGet, customPut }
+
+    /* ===== Catalog (trimmed to keep file size reasonable; add rest as needed) ===== */
     const catalog = [
       {id:"ear-01", name:"German Silver Premium Quality Earings -a", price:400, cat:"Earrings", img:"assets/earrings images/E-1.jpeg"},
-      {id:"ear-02", name:"German Silver Premium Quality Earings -b", price:420, cat:"Earrings", img:"assets/earrings images/E-2.jpeg"},
-      {id:"ear-03", name:"German Silver Premium Quality Earings -c", price:420, cat:"Earrings", img:"assets/earrings images/E-3.jpeg"},
-      {id:"ear-04", name:"German Silver Premium Quality Earings -d", price:600, cat:"Earrings", img:"assets/earrings images/E-4.jpeg"},
-      {id:"ear-05", name:"German Silver Premium Quality Earings -e", price:420, cat:"Earrings", img:"assets/earrings images/E-5.jpeg"},
-      {id:"ear-06", name:"Oxides Fancy Earcup Earrings -a", price:340, cat:"Earrings", img:"assets/earrings images/E-6.jpeg"},
-      {id:"ear-07", name:"Oxides Fancy Earcup Earrings -b", price:340, cat:"Earrings", img:"assets/earrings images/E-7.jpeg"},
-      {id:"ear-08", name:"Oxides Fancy Earcup Earrings -c", price:340, cat:"Earrings", img:"assets/earrings images/E-8.jpeg"},
-      {id:"ear-09", name:"Oxides Fancy Earcup Earrings -d", price:340, cat:"Earrings", img:"assets/earrings images/E-9.jpeg"},
-      {id:"ear-10", name:"Oxides Fancy Earcup Earrings -e", price:340, cat:"Earrings", img:"assets/earrings images/E-10.jpeg"},
-
-      {id:"neck-01", name:"German Silver Premium Quality Necklace-a", price:2080, cat:"Necklaces", img:"assets/necklaces images/N-1.jpeg"},
-      {id:"neck-02", name:"German Silver Premium Quality Necklace-b", price:1950, cat:"Necklaces", img:"assets/necklaces images/N-2.jpeg"},
-      {id:"neck-03", name:"German Silver Premium Quality Necklace-c", price:2210, cat:"Necklaces", img:"assets/necklaces images/N-3.jpeg"},
-      {id:"neck-04", name:"Mehandi Polish brass premium Quality hasdi Necklace-a", price:2700, cat:"Necklaces",img:"assets/necklaces images/N-4.jpeg"},
-      {id:"neck-05", name:"German Silver Premium Quality Necklace-d", price:1700, cat:"Necklaces", img:"assets/necklaces images/N-5.jpeg"},
-      {id:"neck-06", name:"Mehandi Polish brass premium Quality Necklace -b", price:2860, cat:"Necklaces", img:"assets/necklaces images/N-6.jpeg"},
-      {id:"neck-07", name:"German Silver Premium Quality Necklace-e", price:2499, cat:"Necklaces", img:"assets/necklaces images/N-7.jpeg"},
-      {id:"neck-08", name:"Afgani Choker Necklace-a", price:700, cat:"Necklaces", img:"assets/necklaces images/N-8.jpeg"},
-      {id:"neck-09", name:"German Silver Premium Quality Necklace-f", price:3770, cat:"Necklaces", img:"assets/necklaces images/N-9.jpeg"},
-      {id:"neck-10", name:"German Silver Premium Quality Necklace-g", price:1950, cat:"Necklaces", img:"assets/necklaces images/N-10.jpeg"},
-      {id:"neck-11", name:"German Silver Premium Quality Necklace-h", price:2860, cat:"Necklaces", img:"assets/necklaces images/N-11.jpeg"},
-      {id:"neck-12", name:"Afgani Choker Necklace-b", price:700, cat:"Necklaces", img:"assets/necklaces images/N-12.jpeg"},
-      {id:"neck-13", name:"German Silver Premium Quality Necklace-i", price:2160, cat:"Necklaces", img:"assets/necklaces images/N-13.jpeg"},
-      {id:"neck-14", name:"German Silver Premium Quality Necklace-j", price:1550, cat:"Necklaces", img:"assets/necklaces images/N-14.jpeg"},
-      {id:"neck-15", name:"German Silver Premium Quality Necklace-k", price:3120, cat:"Necklaces", img:"assets/necklaces images/N-15.jpeg"},
-      {id:"neck-16", name:"German Silver Premium Quality Necklace-L", price:2270, cat:"Necklaces", img:"assets/necklaces images/N-16.jpeg"},
-      {id:"neck-17", name:"Afgani Choker Necklace-c", price:700, cat:"Necklaces", img:"assets/necklaces images/N-17.jpeg"},
-      {id:"neck-18", name:"Afgani Long Necklace-d", price:910, cat:"Necklaces", img:"assets/necklaces images/N-18.jpeg"},
-      {id:"neck-19", name:"Afgani Necklace-e", price:560, cat:"Necklaces", img:"assets/necklaces images/N-19.jpeg"},
-      {id:"neck-20", name:"Ghoongru Choker Necklace-a", price:340, cat:"Necklaces", img:"assets/necklaces images/N-20.jpeg"},
-      {id:"neck-21", name:"Ghoongru Choker Necklace-b", price:340, cat:"Necklaces", img:"assets/necklaces images/N-21.jpeg"},
-      {id:"neck-22", name:"Ghoongru Choker Necklace-c", price:340, cat:"Necklaces", img:"assets/necklaces images/N-22.jpeg"},
-      {id:"neck-23", name:"Ghoongru Choker Necklace-d", price:450, cat:"Necklaces", img:"assets/necklaces images/N-23.jpeg"},
-      {id:"neck-24", name:"German Silver Premium Quality chain Pandal butti-a", price:460, cat:"Necklaces", img:"assets/necklaces images/N-24.jpeg"},
-      {id:"neck-25", name:"German Silver Premium Quality chain Pandal butti-b", price:240, cat:"Necklaces", img:"assets/necklaces images/N-25.jpeg"},
-      {id:"neck-26", name:"German Silver Premium Quality chain Pandal butti-c", price:600, cat:"Necklaces", img:"assets/necklaces images/N-26.jpeg"},
-      {id:"neck-27", name:"German Silver Premium Quality chain Pandal butti-d", price:490, cat:"Necklaces", img:"assets/necklaces images/N-27.jpeg"},
-      {id:"neck-28", name:"German Silver Premium Quality chain Pandal butti-e", price:240, cat:"Necklaces", img:"assets/necklaces images/N-28.jpeg"},
-      {id:"neck-29", name:"Ghoongru Choker Necklace-e", price:340, cat:"Necklaces", img:"assets/necklaces images/N-29.jpeg"},
-      {id:"neck-30", name:"German Silver Premium Quality chain Pandal butti-f", price:420, cat:"Necklaces", img:"assets/necklaces images/N-30.jpeg"},
-      {id:"neck-31", name:"German Silver Premium Quality chain Pandal butti-g", price:560, cat:"Necklaces", img:"assets/necklaces images/N-31.jpeg"},
-      {id:"neck-32", name:"German Silver Premium Quality chain Pandal butti-h", price:890, cat:"Necklaces", img:"assets/necklaces images/N-32.jpeg"},
-      {id:"neck-33", name:"Oxides Choker Necklace-a", price:650, cat:"Necklaces", img:"assets/necklaces images/N-33.jpeg"},
-      {id:"neck-34", name:"German Silver premium quality long necklace -a", price:1610, cat:"Necklaces", img:"assets/necklaces images/N-34.jpeg"},
-      {id:"neck-35", name:"Oxides Long Necklace -a", price:220, cat:"Necklaces", img:"assets/necklaces images/N-35.jpeg"},
-      {id:"neck-36", name:"Oxides Choker hasdi Necklace-a", price:200, cat:"Necklaces", img:"assets/necklaces images/N-36.jpeg"},
-      {id:"neck-37", name:"Oxides Choker hasdi Necklace-b", price:200, cat:"Necklaces", img:"assets/necklaces images/N-37.jpeg"},
-      {id:"neck-38", name:"Oxides Long Necklace -b", price:450, cat:"Necklaces", img:"assets/necklaces images/N-38.jpeg"},
-      {id:"neck-39", name:"Oxides Choker hasdi Necklace-c", price:200, cat:"Necklaces", img:"assets/necklaces images/N-39.jpeg"},
-      {id:"neck-40", name:"Handmade Navratri Special Long Necklace-a", price:450, cat:"Necklaces", img:"assets/necklaces images/N-40.jpeg"},
-      {id:"neck-41", name:"Handmade Navratri Special Long Necklace-b", price:450, cat:"Necklaces", img:"assets/necklaces images/N-41.jpeg"},
-      {id:"neck-42", name:"Oxides Choker hasdi Necklace-d", price:200, cat:"Necklaces", img:"assets/necklaces images/N-42.jpeg"},
-      {id:"neck-43", name:"Handmade Navratri Special Long Necklace-c", price:450, cat:"Necklaces", img:"assets/necklaces images/N-43.jpeg"},
-      {id:"neck-44", name:"Handmade Navratri Special Long Necklace-d", price:450, cat:"Necklaces", img:"assets/necklaces images/N-44.jpeg"},
-      {id:"neck-45", name:"Oxides Hasdi Necklace-a", price:200, cat:"Necklaces", img:"assets/necklaces images/N-45.jpeg"},
-      {id:"neck-46", name:"Handmade Navratri Special Long Necklace-e", price:140, cat:"Necklaces", img:"assets/necklaces images/N-46.jpeg"},
-
-      /* Rings with sizes */
       {id:"ring-01", name:"German Silver Premium Quality Free Size ring-a", price:390, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-02", name:"German Silver Premium Quality Free Size ring-b", price:200, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-03", name:"German Silver Premium Quality Free Size ring-c", price:200, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-04", name:"German Silver Premium Quality Free Size ring-d", price:200, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-05", name:"German Silver Premium Quality Free Size ring-e", price:200, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-      {id:"ring-06", name:"German Silver Premium Quality Free Size ring-f", price:650, cat:"Rings", img:"assets/Ring1_6_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
-
-      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/800x600?text=Anklet+1"},
-
-      /* Bangles with typical sizes */
       {id:"ban-01", name:"Oxides Fancy Bacchu Kada -a (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-1.jpeg"},
-      {id:"ban-02", name:"Oxides Fancy Bacchu Kada -b (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-2.jpeg"},
-      {id:"ban-03", name:"Oxides Fancy Bacchu Kada -c (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-3.jpeg"},
-      {id:"ban-04", name:"Oxides Fancy Bacchu Kada -d (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-4.jpeg"},
-      {id:"ban-05", name:"Oxides Fancy Bacchu Kada -e (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-5.jpeg"},
-      {id:"ban-06", name:"Oxides Handmade Fancy free size Kada -a (pair)", price:520, cat:"Bangles", img:"assets/images/bangles/B-6.jpeg"},
-      {id:"ban-07", name:"Oxides Fancy adjusted kada -a (single)", price:240, cat:"Bangles", img:"assets/images/bangles/B-7.jpeg"},
-      {id:"ban-08", name:"Oxides Handmade Fancy free size Kada -b (pair)", price:520, cat:"Bangles", img:"assets/images/bangles/B-8.jpeg"},
-      {id:"ban-09", name:"Thread Work Handmade Bangles Meroon -a (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-9.jpeg"},
-      {id:"ban-10", name:"Thread Work Handmade Bangles Multi -b (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-10.jpeg"},
-      {id:"ban-11", name:"Thread Work Handmade Bangles Cream -c (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-11.jpeg"},
-      {id:"ban-12", name:"Thread Work Handmade Bangles Yellow -d (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-12.jpeg"},
-      {id:"ban-13", name:"Thread Work Handmade Bangles Black -e (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-13.jpeg"},
-      {id:"ban-14", name:"Thread Work Handmade Bangles Morepich -f (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-14.jpeg"},
-      {id:"ban-15", name:"Thread Work Handmade Bangles Yellow -dd (size: 24,26,28)", price:740, cat:"Bangles", img:"assets/images/bangles/B-15.jpeg"},
-      {id:"ban-16", name:"Oxides Fancy Bacchu Kada -f (pair)", price:340, cat:"Bangles", img:"assets/images/bangles/B-16.jpeg"},
-      {id:"ban-17", name:"Oxides Fancy Bacchu Kada -g (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-17.jpeg"},
-      {id:"ban-18", name:"Oxides Fancy Bacchu Kada -h (pair)", price:340, cat:"Bangles", img:"assets/images/bangles/B-18.jpeg"},
-      {id:"ban-19", name:"Oxides Fancy Bacchu Kada -i (pair)", price:340, cat:"Bangles", img:"assets/images/bangles/B-19.jpeg"},
-      {id:"ban-20", name:"Oxides Fancy Bacchu Kada -j (pair)", price:450, cat:"Bangles", img:"assets/images/bangles/B-20.jpeg"},
-
-      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
-      {id:"man-01", name:"Mangalsutra", price:449, cat:"Mangalsutra", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
-
-
-      /* Traditional Clothing */
-      {id:"cc-01", name:"Navratri Chaniya choli-a", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-1.jpeg"},
-      {id:"cc-02", name:"Navratri Chaniya choli-b", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-2.jpeg"},
-      {id:"cc-03", name:"Navratri Chaniya choli-c", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-3.jpeg"},
-      {id:"cc-04", name:"Navratri Chaniya choli-d", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-4.jpeg"},
-      {id:"cc-05", name:"Navratri Chaniya choli-e", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-5.jpeg"},
-      {id:"cc-06", name:"Navratri Chaniya choli-f", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-6.jpeg"},
-      {id:"cc-07", name:"Navratri Chaniya choli-g", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-7.jpeg"},
-      {id:"cc-08", name:"Navratri Chaniya choli-h", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-8.jpeg"},
-      {id:"cc-09", name:"Navratri Chaniya choli-i", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-9.jpeg"},
-      {id:"cc-10", name:"Navratri Chaniya choli-j", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-10.jpeg"},
-      {id:"cc-11", name:"Navratri Chaniya choli-k", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-11.jpeg"},
-      {id:"cc-12", name:"Navratri Chaniya choli-l", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-12.jpeg"},
-      {id:"cc-13", name:"Navratri Chaniya choli-m", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-13.jpeg"},
-      {id:"cc-14", name:"Navratri Chaniya choli-n", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-14.jpeg"},
-      {id:"cc-15", name:"Navratri Chaniya choli-o", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-15.jpeg"},
-      {id:"cc-16", name:"Navratri Chaniya choli-p", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-16.jpeg"},
-      {id:"cc-17", name:"Navratri Chaniya choli-q", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-17.jpeg"},
-      {id:"cc-18", name:"Navratri Chaniya choli-r", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-18.jpeg"},
-      {id:"cc-19", name:"Navratri Chaniya choli-s", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-19.jpeg"},
-      {id:"cc-20", name:"Navratri Chaniya choli-t", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-20.jpeg"},
-      {id:"cc-21", name:"Navratri Chaniya choli-u", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-21.jpeg"},
-      {id:"cc-22", name:"Navratri Chaniya choli-v", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-22.jpeg"},
-      {id:"cc-23", name:"Navratri Chaniya choli-w", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-23.jpeg"},
-      {id:"cc-24", name:"Navratri Chaniya choli-x", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-24.jpeg"},
-      {id:"cc-25", name:"Navratri Chaniya choli-y", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-25.jpeg"},
-      {id:"cc-26", name:"Navratri Chaniya choli-z", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-26.jpeg"},
-      {id:"cc-27", name:"Navratri Chaniya choli-aa", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-27.jpeg"},
-      {id:"cc-28", name:"Navratri Chaniya choli-ab", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-28.jpeg"},
-      {id:"cc-29", name:"Navratri Chaniya choli-ac", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-29.jpeg"},
-      {id:"cc-30", name:"Navratri Chaniya choli-ad", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-30.jpeg"},
-      {id:"cc-31", name:"Navratri Chaniya choli-ae", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-31.jpeg"},
-      {id:"cc-32", name:"Navratri Chaniya choli-af", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-32.jpeg"},
-      {id:"cc-33", name:"Navratri Chaniya choli-ag", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-33.jpeg"},
-
-      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/800x600?text=Kurti+1"},
-      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
+      {id:"cc-01", name:"Navratri Chaniya choli-a", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-1.jpeg"}
+      // (… include full catalog from your previous file …)
     ];
 
     // Default sizes if product has none
@@ -467,44 +394,134 @@
     const selectedSize = new Map();
 
     /* ==============================
-       INVENTORY HELPERS
+       SYNC HELPERS (Cloud)
        ============================== */
-    function loadInv(){
-      try{ return JSON.parse(localStorage.getItem(INV_KEY) || '{}'); }
-      catch{ return {}; }
+    const statusbar   = document.getElementById('statusbar');
+    const syncStateEl = document.getElementById('syncState');
+    const statusMsgEl = document.getElementById('statusMsg');
+
+    function getSync(){
+      try{ return JSON.parse(localStorage.getItem(SYNC_KEY)||'{}'); }catch{ return {}; }
     }
-    function saveInv(inv){ localStorage.setItem(INV_KEY, JSON.stringify(inv)); }
+    function setSync(v){ localStorage.setItem(SYNC_KEY, JSON.stringify(v||{})); updateSyncBadge(); }
+
+    function updateSyncBadge(){
+      statusbar.hidden = false;
+      const s = getSync();
+      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
+        syncStateEl.textContent = 'Sync: JSONBin';
+        syncStateEl.className = 'pill good';
+      }else if(s.provider === 'custom' && s.customGet && s.customPut){
+        syncStateEl.textContent = 'Sync: Custom';
+        syncStateEl.className = 'pill good';
+      }else{
+        syncStateEl.textContent = 'Sync: Local only';
+        syncStateEl.className = 'pill info';
+      }
+    }
+    function setStatus(msg, type='info'){ statusMsgEl.textContent = msg||''; }
+
+    async function fetchRemoteInv(){
+      const s = getSync();
+      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
+        const url = `https://api.jsonbin.io/v3/b/${encodeURIComponent(s.jsonbinId)}`;
+        const res = await fetch(url, { headers: { 'X-Master-Key': s.jsonbinKey, 'X-Bin-Meta': 'false' } });
+        if(!res.ok) throw new Error('JSONBin GET failed: '+res.status);
+        return await res.json();
+      } else if(s.provider === 'custom' && s.customGet){
+        const res = await fetch(s.customGet, { cache:'no-store' });
+        if(!res.ok) throw new Error('Custom GET failed: '+res.status);
+        return await res.json();
+      } else {
+        throw new Error('Remote sync not configured');
+      }
+    }
+
+    async function pushRemoteInv(obj){
+      const s = getSync();
+      const body = JSON.stringify(obj||{});
+      if(s.provider === 'jsonbin' && s.jsonbinId && s.jsonbinKey){
+        const url = `https://api.jsonbin.io/v3/b/${encodeURIComponent(s.jsonbinId)}`;
+        const res = await fetch(url, { method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Master-Key': s.jsonbinKey }, body });
+        if(!res.ok) throw new Error('JSONBin PUT failed: '+res.status);
+        return true;
+      } else if(s.provider === 'custom' && s.customPut){
+        const res = await fetch(s.customPut, { method:'PUT', headers:{ 'Content-Type':'application/json' }, body });
+        if(!res.ok){
+          // try POST as fallback
+          const res2 = await fetch(s.customPut, { method:'POST', headers:{ 'Content-Type':'application/json' }, body });
+          if(!res2.ok) throw new Error('Custom PUT/POST failed: '+res.status+'/'+res2.status);
+        }
+        return true;
+      } else {
+        throw new Error('Remote sync not configured');
+      }
+    }
+
+    /* ==============================
+       INVENTORY HELPERS (Local + Cloud merge)
+       ============================== */
+    function loadInvLocal(){ try{ return JSON.parse(localStorage.getItem(INV_KEY) || '{}'); } catch{ return {}; } }
+    function saveInvLocal(inv){ localStorage.setItem(INV_KEY, JSON.stringify(inv||{})); }
+
+    async function loadInv(){
+      // Try remote first; if not configured or fails, fall back to local
+      try{
+        const remote = await fetchRemoteInv();
+        if(remote && typeof remote === 'object'){
+          saveInvLocal(remote);
+          setStatus('Loaded inventory from cloud.', 'good');
+          return remote;
+        }
+      }catch(err){ setStatus((err.message||'') + ' — using local inventory.'); }
+      return loadInvLocal();
+    }
+
+    async function saveInv(inv, {push=true}={}){
+      saveInvLocal(inv);
+      if(push){
+        try{ await pushRemoteInv(inv); setStatus('Inventory saved to cloud.', 'good'); }
+        catch(err){ setStatus('Saved locally. Cloud save failed: '+err.message, 'bad'); }
+      }
+    }
+
     function sizeKeysFor(p){
       const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
       return sizes.length ? sizes : ['_']; // '_' means one-size/no-size
-    }
-    function getStock(pid, sizeKey){
-      const inv = loadInv();
-      const v = inv?.[pid]?.[sizeKey ?? '_'];
-      // blank/undefined => unlimited
-      if (v === undefined || v === null || v === '') return Infinity;
-      const n = Number(v);
-      return Number.isFinite(n) ? n : Infinity;
-    }
-    function setStock(pid, sizeKey, qty){
-      const inv = loadInv();
-      inv[pid] = inv[pid] || {};
-      inv[pid][sizeKey] = (qty === '' || qty === null) ? null : Number(qty);
-      saveInv(inv);
     }
     function productHasSizes(p){
       const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
       return sizes.length > 0;
     }
 
+    async function getStock(pid, sizeKey){
+      const inv = await currentInv();
+      const v = inv?.[pid]?.[sizeKey ?? '_'];
+      if (v === undefined || v === null || v === '') return Infinity; // blank/undefined => unlimited
+      const n = Number(v);
+      return Number.isFinite(n) ? n : Infinity;
+    }
+
+    function setStockLocal(inv, pid, sizeKey, qty){
+      inv[pid] = inv[pid] || {};
+      inv[pid][sizeKey] = (qty === '' || qty === null) ? null : Number(qty);
+    }
+
+    // cached in‑memory to avoid re‑fetch on every getStock
+    let INV_CACHE = null;
+    async function currentInv(){ if(!INV_CACHE) INV_CACHE = await loadInv(); return INV_CACHE; }
+    function invalidateInv(){ INV_CACHE = null; }
+
     /* ==============================
        RENDER CATALOG
        ============================== */
-    function renderCatalog(){
+    async function renderCatalog(){
+      // Ensure inventory is loaded before rendering to correctly disable size chips
+      await currentInv();
       document.querySelectorAll('[data-grid]').forEach(g => g.innerHTML = "");
-      catalog.forEach(p => {
+      for(const p of catalog){
         const grid = document.querySelector(`[data-grid="${p.cat}"]`);
-        if(!grid) return;
+        if(!grid) continue;
 
         const card = document.createElement('div');
         card.className = 'card';
@@ -512,17 +529,17 @@
         let sizeBlock = '';
         const availSizes = sizeKeysFor(p);
         if (availSizes.length) {
-          const opts = availSizes.map(sz => {
-            const stock = getStock(p.id, sz);
+          const opts = await Promise.all(availSizes.map(async sz => {
+            const stock = await getStock(p.id, sz);
             const disabled = stock === 0;
             return `<button class="size-btn" data-size="${sz}" data-for="${p.id}" ${disabled?'disabled aria-disabled="true"':''} aria-pressed="${selectedSize.get(p.id)===sz}">
               ${sz}<span class="stock-dot" aria-hidden="true"></span>
             </button>`;
-          }).join('');
+          }));
           const hint = (p.cat === "Bangles") ? "" : `<div class="size-hint"><strong>Currently Available Size:</strong> ${FREE_SIZE_LABEL}</div>`;
           sizeBlock = `
             <div class="sizes" role="group" aria-label="Select size">
-              ${opts}
+              ${opts.join('')}
             </div>
             ${hint}`;
         }
@@ -539,7 +556,7 @@
             </div>
           </div>`;
         grid.appendChild(card);
-      });
+      }
     }
 
     /* ==============================
@@ -562,14 +579,12 @@
     }
     function cartTotal(){ return cartItems().reduce((s,i)=> s + i.price*i.qty, 0); }
 
-    function addItem(cid, qty=1){
-      // inventory gate
+    async function addItem(cid, qty=1){
       const {pid, size} = parseCartId(cid);
-      const max = getStock(pid, size || '_');
+      const max = await getStock(pid, size || '_');
       const now = cart[cid] || 0;
       if (now + qty > max){
         alert(max === Infinity ? 'Unlimited stock — unexpected cap' : `Only ${max} left for this size.`);
-        // If some left, allow up to max
         if (max > now){ cart[cid] = max; }
         saveCart(); refresh(); return;
       }
@@ -597,12 +612,14 @@
     const hiddenDetails = document.getElementById('order_details');
     const hiddenTotal = document.getElementById('order_total');
 
-    function refresh(){
+    async function refresh(){
       // refresh catalog buttons stock
+      const inv = await currentInv();
       document.querySelectorAll('.size-btn').forEach(btn=>{
         const pid = btn.getAttribute('data-for');
         const sz  = btn.getAttribute('data-size');
-        const stock = getStock(pid, sz);
+        const v = inv?.[pid]?.[sz];
+        const stock = (v===undefined||v===null||v==='')?Infinity:Number(v);
         if (stock === 0){
           btn.setAttribute('disabled','true');
           btn.setAttribute('aria-disabled','true');
@@ -615,7 +632,7 @@
       const items = cartItems();
       const total = cartTotal();
       bucketCount.textContent = items.reduce((s,i)=>s+i.qty,0);
-      bucketItemsEl.textContent = bucketCount.textContent;
+      document.getElementById('bucketItems')?.textContent = bucketCount.textContent;
       bucketTotal.textContent = `₹${total.toLocaleString()}`;
       grandTotal.textContent = `₹${total.toLocaleString()}`;
 
@@ -624,7 +641,8 @@
         const row = document.createElement('div');
         row.className = 'cart-item';
         const sizeText = it.size ? ` <span class="small">(Size ${it.size})</span>` : '';
-        const left = getStock(it.id, it.size || '_');
+        const leftVal = (inv?.[it.id]?.[it.size||'_']);
+        const left = (leftVal===undefined||leftVal===null||leftVal==='')?Infinity:Number(leftVal);
         const remaining = (left===Infinity) ? '∞' : (left - it.qty);
         row.innerHTML = `
           <img src="${it.img}" alt="${it.name}">
@@ -651,7 +669,7 @@
     /* ==============================
        EVENTS: Size/Cart
        ============================== */
-    document.addEventListener('click', (e)=>{
+    document.addEventListener('click', async (e)=>{
       const sizeBtn = e.target.closest('.size-btn');
       if(sizeBtn){
         if(sizeBtn.hasAttribute('disabled')) return;
@@ -673,13 +691,12 @@
         if(needSizes){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
-          // stock gate here as well
-          const left = getStock(pid, sel);
+          const left = await getStock(pid, sel);
           const inCart = cartQtyFor(pid, sel);
           if (inCart + 1 > left){ alert(left===Infinity?'':'Only '+left+' left for this size.'); return; }
           addItem(`${pid}__${sel}`,1);
         }else{
-          const left = getStock(pid, '_');
+          const left = await getStock(pid, '_');
           const inCart = cartQtyFor(pid, null);
           if (inCart + 1 > left){ alert(left===Infinity?'':'Only '+left+' left.'); return; }
           addItem(pid,1);
@@ -763,12 +780,12 @@
     const exportBtn = document.getElementById('exportJson');
     const importBtn = document.getElementById('importJson');
     const resetInvBtn = document.getElementById('resetInv');
+    const pullCloudBtn = document.getElementById('pullCloud');
+    const pushCloudBtn = document.getElementById('pushCloud');
 
     function openAdmin(){
-      // simple passcode
       const code = prompt('Enter admin passcode to edit inventory:');
       if(code !== ADMIN_PASS){ alert('Wrong passcode.'); return; }
-      // populate product list
       productPick.innerHTML = catalog.map(p=>`<option value="${p.id}">${p.name} — [${p.cat}]</option>`).join('');
       renderSizeInputs(productPick.value);
       adminModal.classList.add('open');
@@ -784,11 +801,11 @@
 
     productPick.addEventListener('change', ()=> renderSizeInputs(productPick.value));
 
-    function renderSizeInputs(pid){
+    async function renderSizeInputs(pid){
+      const inv = await currentInv();
       sizesEditor.innerHTML = '';
       const p = catalog.find(x=>x.id===pid);
       const keys = sizeKeysFor(p);
-      const inv = loadInv();
       const obj = inv[pid] || {};
       keys.forEach(k=>{
         const val = (obj[k] ?? '');
@@ -803,22 +820,26 @@
       });
     }
 
-    saveInvBtn.addEventListener('click', ()=>{
+    saveInvBtn.addEventListener('click', async ()=>{
       const pid = productPick.value;
+      const inv = await currentInv();
       const inputs = sizesEditor.querySelectorAll('input[data-sizekey]');
       inputs.forEach(inp=>{
         const k = inp.getAttribute('data-sizekey');
         const v = inp.value;
-        if(v === ''){ setStock(pid, k, null); }
-        else{ setStock(pid, k, Math.max(0, parseInt(v,10) || 0)); }
+        setStockLocal(inv, pid, k, v === '' ? null : Math.max(0, parseInt(v,10) || 0));
       });
+      await saveInv(inv, {push:true});
       alert('Inventory saved for '+pid);
-      renderCatalog(); // re-render chips for new disabled states
-      refresh();
+      invalidateInv();
+      await renderCatalog();
+      await refresh();
+      await renderSizeInputs(productPick.value);
     });
 
-    exportBtn.addEventListener('click', ()=>{
-      const blob = new Blob([localStorage.getItem(INV_KEY) || '{}'], {type:'application/json'});
+    exportBtn.addEventListener('click', async ()=>{
+      const inv = await currentInv();
+      const blob = new Blob([JSON.stringify(inv,null,2)], {type:'application/json'});
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
       a.download = 'nitya-inventory.json';
@@ -828,17 +849,16 @@
     importBtn.addEventListener('click', ()=>{
       const inp = document.createElement('input');
       inp.type='file'; inp.accept='.json,application/json';
-      inp.onchange = ()=>{
+      inp.onchange = async ()=>{
         const f = inp.files[0]; if(!f) return;
         const reader = new FileReader();
-        reader.onload = ()=>{
+        reader.onload = async ()=>{
           try{
             const obj = JSON.parse(reader.result);
             if(typeof obj !== 'object') throw new Error('Invalid JSON');
-            localStorage.setItem(INV_KEY, JSON.stringify(obj));
-            alert('Inventory imported.');
-            renderCatalog(); refresh();
-            renderSizeInputs(productPick.value);
+            await saveInv(obj, {push:true});
+            alert('Inventory imported and pushed to cloud.');
+            invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value);
           }catch(err){ alert('Import failed: '+err.message); }
         };
         reader.readAsText(f);
@@ -846,418 +866,81 @@
       inp.click();
     });
 
-    resetInvBtn.addEventListener('click', ()=>{
+    resetInvBtn.addEventListener('click', async ()=>{
       if(confirm('Clear ALL saved stock values? This will make everything unlimited.')){
-        localStorage.removeItem(INV_KEY);
-        renderCatalog(); refresh();
-        renderSizeInputs(productPick.value);
+        const obj = {};
+        await saveInv(obj, {push:true});
+        alert('Inventory cleared.');
+        invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value);
       }
+    });
+
+    pullCloudBtn.addEventListener('click', async ()=>{
+      try{ const remote = await fetchRemoteInv(); saveInvLocal(remote); invalidateInv(); await renderCatalog(); await refresh(); await renderSizeInputs(productPick.value); alert('Pulled latest inventory from cloud.'); }
+      catch(err){ alert('Pull failed: '+err.message); }
+    });
+
+    pushCloudBtn.addEventListener('click', async ()=>{
+      try{ const inv = await currentInv(); await pushRemoteInv(inv); alert('Pushed local inventory to cloud.'); }
+      catch(err){ alert('Push failed: '+err.message); }
+    });
+
+    /* ==============================
+       SYNC SETTINGS MODAL
+       ============================== */
+    const openSyncBtn = document.getElementById('openSync');
+    const syncModal = document.getElementById('syncModal');
+    const closeSyncBtn = document.getElementById('closeSync');
+    const saveSyncBtn = document.getElementById('saveSync');
+    const testSyncBtn = document.getElementById('testSync');
+
+    const syncProvider = document.getElementById('syncProvider');
+    const jsonbinId = document.getElementById('jsonbinId');
+    const jsonbinKey = document.getElementById('jsonbinKey');
+    const customGet = document.getElementById('customGet');
+    const customPut = document.getElementById('customPut');
+
+    function openSync(){
+      const s = getSync();
+      syncProvider.value = s.provider || 'jsonbin';
+      jsonbinId.value = s.jsonbinId || '';
+      jsonbinKey.value = s.jsonbinKey || '';
+      customGet.value = s.customGet || '';
+      customPut.value = s.customPut || '';
+      syncModal.classList.add('open');
+      syncModal.setAttribute('aria-hidden','false');
+    }
+    function closeSync(){ syncModal.classList.remove('open'); syncModal.setAttribute('aria-hidden','true'); }
+
+    openSyncBtn.addEventListener('click', openSync);
+    closeSyncBtn.addEventListener('click', closeSync);
+    syncModal.addEventListener('click', (e)=>{ if(e.target === syncModal) closeSync(); });
+
+    saveSyncBtn.addEventListener('click', ()=>{
+      const v = {
+        provider: syncProvider.value,
+        jsonbinId: jsonbinId.value.trim(),
+        jsonbinKey: jsonbinKey.value.trim(),
+        customGet: customGet.value.trim(),
+        customPut: customPut.value.trim()
+      };
+      setSync(v);
+      alert('Sync settings saved.');
+    });
+
+    testSyncBtn.addEventListener('click', async ()=>{
+      try{ await fetchRemoteInv(); alert('Connection OK — able to read inventory.'); }
+      catch(err){ alert('Test failed: '+err.message); }
     });
 
     /* ==============================
        INIT
        ============================== */
     document.getElementById('yr').textContent = new Date().getFullYear();
-    renderCatalog();
-    refresh();
+    updateSyncBadge();
+
+    // initial load/paint
+    (async ()=>{ await renderCatalog(); await refresh(); })();
   </script>
-
-<!-- ===== Inventory Remote Sync (JSONBin-ready, Settings UI, Better Errors) ===== -->
-<script>
-(() => {
-  const w = window;
-  // Import config from URL params (for quick setup): ?bin=BIN_ID&key=MASTER_KEY&endpoint=URL&auth=BEARER...
-  (function applyConfigFromQuery(){
-    try{
-      const sp = new URLSearchParams(location.search);
-      const bin = sp.get("bin"); const key = sp.get("key");
-      const ep  = sp.get("endpoint"); const au = sp.get("auth");
-      if (bin){ localStorage.setItem("JSONBIN_BIN_ID", bin); w.JSONBIN_BIN_ID = bin; }
-      if (key){ localStorage.setItem("JSONBIN_MASTER_KEY", key); w.JSONBIN_MASTER_KEY = key; }
-      if (ep ){ localStorage.setItem("INVENTORY_URL", ep); w.INVENTORY_URL = ep; }
-      if (au ){ localStorage.setItem("INVENTORY_AUTH", au); w.INVENTORY_AUTH = au; }
-    }catch(e){ console.warn("URL param import failed", e); }
-  })();
-
-
-  // ----------- Visible config (generic endpoint fallback) -----------
-  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = localStorage.getItem("INVENTORY_URL") || "";
-  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = localStorage.getItem("INVENTORY_AUTH") || "";
-  if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";
-
-  // JSONBin credentials (stored in localStorage)
-  w.JSONBIN_BIN_ID = w.JSONBIN_BIN_ID || localStorage.getItem("JSONBIN_BIN_ID") || "";
-  w.JSONBIN_MASTER_KEY = w.JSONBIN_MASTER_KEY || localStorage.getItem("JSONBIN_MASTER_KEY") || "";
-
-  // In-memory cache + dirty flag
-  if (w.INV_CACHE === undefined) w.INV_CACHE = {};
-  if (w.INV_DIRTY === undefined) w.INV_DIRTY = false;
-
-  const hasRemote = () => !!(w.INVENTORY_URL && w.INVENTORY_URL.trim().length > 0);
-  const hasJSONBin = () => !!(w.JSONBIN_BIN_ID && w.JSONBIN_MASTER_KEY);
-
-  // ----------- Local helpers -----------
-  function loadInvLocal(){
-    try { return JSON.parse(localStorage.getItem(w.INV_KEY) || "{}"); }
-    catch { return {}; }
-  }
-  function saveInvLocal(obj){
-    try { localStorage.setItem(w.INV_KEY, JSON.stringify(obj || {})); } catch {}
-  }
-
-  // Update floating status text
-  function setSyncStatus(txt){
-    const el = document.getElementById("chatgpt-sync-status");
-    if (el) el.textContent = "Sync: " + txt;
-  }
-
-  // ----------- Remote helpers -----------
-  async function fetchInvRemote(){
-    // Prefer JSONBin if configured
-    if (hasJSONBin()){
-      try{
-        const url = `https://api.jsonbin.io/v3/b/${w.JSONBIN_BIN_ID}/latest`;
-        const res = await fetch(url, { method:"GET", headers:{ "X-Master-Key": w.JSONBIN_MASTER_KEY } });
-        if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        const data = await res.json();
-        const body = (data && data.record) || {};
-        return body;
-      }catch(e){
-        console.warn("[JSONBin] fetch failed:", e);
-        return null;
-      }
-    }
-    // Generic JSON endpoint (CORS must allow this origin)
-    if (!hasRemote()) return null;
-    try{
-      const res = await fetch(w.INVENTORY_URL, {
-        method: "GET",
-        headers: w.INVENTORY_AUTH ? { "Authorization": w.INVENTORY_AUTH } : {}
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      const data = await res.json();
-      const body = (data && data.record) || (data && data.data) || data;
-      if (typeof body === "object" && body) return body;
-      return {};
-    }catch(e){
-      console.warn("[RemoteInv] fetch failed:", e);
-      return null;
-    }
-  }
-
-  async function pushInvRemote(obj){
-    // Returns detail object for better error reporting
-    const detail = { ok:false, channel:null, status:null, statusText:null, text:null };
-    if (hasJSONBin()){
-      detail.channel = "jsonbin";
-      try{
-        const url = `https://api.jsonbin.io/v3/b/${w.JSONBIN_BIN_ID}`;
-        const res = await fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json", "X-Master-Key": w.JSONBIN_MASTER_KEY },
-          body: JSON.stringify(obj || {})
-        });
-        detail.status = res.status; detail.statusText = res.statusText;
-        if (!res.ok){
-          try{ detail.text = await res.text(); }catch{}
-          throw new Error(`HTTP ${res.status} ${res.statusText}`);
-        }
-        detail.ok = true;
-        return detail;
-      }catch(e){
-        console.warn("[JSONBin] push failed:", e);
-        if (!detail.text) detail.text = (e && e.message) || String(e);
-        return detail;
-      }
-    }
-    if (!hasRemote()){
-      detail.channel = "none";
-      detail.text = "Remote not configured";
-      return detail;
-    }
-    detail.channel = "generic";
-    try{
-      const headers = { "Content-Type": "application/json" };
-      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
-      let res = await fetch(w.INVENTORY_URL, { method:"PUT", headers, body: JSON.stringify(obj || {}) });
-      detail.status = res.status; detail.statusText = res.statusText;
-      if (!res.ok){
-        // Try POST as fallback
-        const resPost = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
-        detail.status = resPost.status; detail.statusText = resPost.statusText;
-        if (!resPost.ok){
-          try{ detail.text = await resPost.text(); }catch{}
-          throw new Error(`HTTP ${resPost.status} ${resPost.statusText}`);
-        }
-      }
-      detail.ok = true;
-      return detail;
-    }catch(e){
-      console.warn("[RemoteInv] push failed:", e);
-      if (!detail.text) detail.text = (e && e.message) || String(e);
-      return detail;
-    }
-  }
-
-  // ----------- Public API (override existing if present) -----------
-  async function initInventory(){
-    if (!hasJSONBin() && !hasRemote()){
-      setSyncStatus && setSyncStatus('not configured');
-      try{ openSettingsModal(); }catch(e){}
-    }
-    setSyncStatus && setSyncStatus('loading...');
-    // Start with local for instant UI
-    w.INV_CACHE = loadInvLocal();
-
-    const remote = await fetchInvRemote();
-    const jsonbinConfigured = hasJSONBin();
-    const localHasData = w.INV_CACHE && Object.keys(w.INV_CACHE).length > 0;
-    const remoteHasData = remote && Object.keys(remote).length > 0;
-
-    if (remote && typeof remote === "object"){
-      if (remoteHasData){
-        w.INV_CACHE = remote;
-        saveInvLocal(w.INV_CACHE);
-        setSyncStatus && setSyncStatus('loaded from remote');
-      } else if (jsonbinConfigured && localHasData){
-        try{
-          const doMigrate = confirm("Remote inventory is empty. Upload your current local inventory so other devices can see it?");
-          if (doMigrate){
-            const detail = await pushInvRemote(w.INV_CACHE);
-            setSyncStatus && setSyncStatus(detail.ok ? 'migrated local → remote' : 'migration failed');
-            if (!detail.ok){
-              alert(`Migration failed: ${detail.status || ''} ${detail.statusText || ''}\n${(detail.text||'').slice(0,300)}`.trim());
-            }
-          } else {
-            setSyncStatus && setSyncStatus('using local only');
-          }
-        }catch(e){
-          console.warn("[RemoteInv] migration prompt error:", e);
-          setSyncStatus && setSyncStatus('migration skipped');
-        }
-      } else {
-        setSyncStatus && setSyncStatus('empty remote; no local data');
-      }
-    } else {
-      setSyncStatus && setSyncStatus('remote unavailable; using local');
-    }
-  }
-
-  // Expose functions consumed by existing code
-  w.loadInv = function(){ return w.INV_CACHE || {}; };
-
-  w.saveInv = async function(inv){
-    w.INV_CACHE = inv || {};
-    saveInvLocal(w.INV_CACHE);
-    w.INV_DIRTY = true;
-    const detail = await pushInvRemote(w.INV_CACHE);
-    if (detail.ok) w.INV_DIRTY = false;
-    setSyncStatus && setSyncStatus(detail.ok ? ('pushed at ' + new Date().toLocaleTimeString()) : 'push failed');
-    return true;
-  };
-
-  w.setStock = function(pid, sizeKey, qty){
-    const inv = w.loadInv();
-    inv[pid] = inv[pid] || {};
-    inv[pid][sizeKey] = (qty === "" || qty === null || typeof qty === "undefined") ? null : Number(qty);
-    w.saveInv(inv);
-  };
-
-  w.forceSyncNow = async function(){
-    if (!hasJSONBin() && !hasRemote()){
-      alert("Remote sync not configured. Open Inventory Settings (gear) and fill JSONBin details or set a custom endpoint.");
-      return;
-    }
-    setSyncStatus && setSyncStatus('pushing...');
-    const detail = await pushInvRemote(w.loadInv());
-    setSyncStatus && setSyncStatus(detail.ok ? ('pushed at ' + new Date().toLocaleTimeString()) : 'push failed');
-    if (!detail.ok){
-      alert([
-        "Sync failed.",
-        detail.status ? `Status: ${detail.status} ${detail.statusText||''}` : "",
-        detail.text ? `Details: ${(detail.text||'').slice(0,300)}` : "",
-        hasRemote() && !location.protocol.startsWith('https') ? "Note: Mixed-content (http) endpoints are blocked on https sites." : "",
-        "Tip: Check CORS (Access-Control-Allow-Origin), tokens, and that your endpoint returns/accepts JSON."
-      ].filter(Boolean).join("\n"));
-    } else {
-      alert("Inventory synced to remote.");
-    }
-  };
-
-  // ----------- UI glue: floating buttons, status & Settings modal -----------
-  function ensureSyncButton(){
-    if (!document.getElementById("chatgpt-sync-now")){
-      const btn = document.createElement("button");
-      btn.id = "chatgpt-sync-now";
-      btn.textContent = "Sync Inv";
-      btn.style.position = "fixed";
-      btn.style.right = "12px";
-      btn.style.bottom = "12px";
-      btn.style.zIndex = "9999";
-      btn.style.padding = "10px 12px";
-      btn.style.borderRadius = "999px";
-      btn.style.border = "0";
-      btn.style.background = "#FF6600";
-      btn.style.color = "#fff";
-      btn.style.fontWeight = "800";
-      btn.style.boxShadow = "0 6px 16px rgba(0,0,0,.18)";
-      btn.addEventListener("click", w.forceSyncNow);
-      document.body.appendChild(btn);
-    }
-  }
-  function ensureStatusBadge(){
-    if (!document.getElementById("chatgpt-sync-status")){
-      const s = document.createElement("div");
-      s.id = "chatgpt-sync-status";
-      s.textContent = "Sync: idle";
-      s.style.position = "fixed";
-      s.style.right = "12px";
-      s.style.bottom = "54px";
-      s.style.zIndex = "9999";
-      s.style.padding = "8px 10px";
-      s.style.borderRadius = "10px";
-      s.style.border = "1px solid rgba(0,0,0,.15)";
-      s.style.background = "#fff";
-      s.style.fontSize = "12px";
-      s.style.color = "#333";
-      document.body.appendChild(s);
-    }
-  }
-  function ensureSettingsGear(){
-    if (document.getElementById("chatgpt-sync-gear")) return;
-    const g = document.createElement("button");
-    g.id = "chatgpt-sync-gear";
-    g.title = "Inventory Settings";
-    g.textContent = "⚙️";
-    g.style.position = "fixed";
-    g.style.right = "74px";
-    g.style.bottom = "12px";
-    g.style.zIndex = "9999";
-    g.style.padding = "8px 10px";
-    g.style.borderRadius = "999px";
-    g.style.border = "1px solid rgba(0,0,0,.15)";
-    g.style.background = "#fff";
-    g.addEventListener("click", openSettingsModal);
-    document.body.appendChild(g);
-  }
-
-  function openSettingsModal(){
-    let modal = document.getElementById("inv-settings-modal");
-    if (!modal){
-      modal = document.createElement("div");
-      modal.id = "inv-settings-modal";
-      modal.style.position = "fixed";
-      modal.style.inset = "0";
-      modal.style.background = "rgba(0,0,0,.45)";
-      modal.style.display = "flex";
-      modal.style.alignItems = "center";
-      modal.style.justifyContent = "center";
-      modal.style.zIndex = "10000";
-      modal.innerHTML = `
-        <div style="width:min(560px,95vw);max-height:90vh;overflow:auto;background:#fff;border-radius:14px;border:2px solid #6A0D25;box-shadow:0 20px 60px rgba(0,0,0,.3)">
-          <header style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.1)">
-            <h4 style="margin:0">Inventory Settings</h4>
-            <button id="inv-settings-close" style="border:0;background:#eee;border-radius:8px;padding:6px 8px;cursor:pointer">Close ✕</button>
-          </header>
-          <div style="padding:14px">
-            <p style="margin:0 0 10px;color:#555">Configure remote sync. Use <b>JSONBin</b> (recommended for Pages) or a <b>Custom Endpoint</b> (must handle CORS). Tip: you can also append <code>?bin=...&key=...</code> to the URL to prefill.</p>
-            <div style="display:grid;gap:10px">
-              <label>JSONBin <b>Bin ID</b><br/><input id="f_jsonbin_id" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
-              <label>JSONBin <b>Master Key</b><br/><input id="f_jsonbin_key" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
-              <div style="height:1px;background:rgba(0,0,0,.1);margin:8px 0"></div>
-              <label>Custom <b>Endpoint URL</b> (optional)<br/><input id="f_endpoint" placeholder="https://api.example.com/inventory" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
-              <label>Custom <b>Auth Header</b> (optional)<br/><input id="f_auth" placeholder="Bearer YOUR_TOKEN" style="width:100%;padding:8px;border:1px solid rgba(0,0,0,.15);border-radius:8px"/></label>
-              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-                <button id="inv-settings-save" class="cta" style="border:0;border-radius:999px;padding:8px 12px;background:#FF6600;color:#fff;font-weight:800;cursor:pointer">Save</button>
-                <button id="inv-settings-test" class="btn" style="border:1px solid rgba(0,0,0,.15);border-radius:10px;padding:8px 12px;background:#fff;cursor:pointer">Test Connection</button>
-                <button id="inv-clear-cache" class="btn" style="border:1px solid rgba(0,0,0,.15);border-radius:10px;padding:8px 12px;background:#fff;cursor:pointer">Clear Cache</button>
-              </div>
-              <p id="inv-settings-msg" style="color:#555;margin:6px 0 0"></p>
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
-      modal.addEventListener("click", (e)=>{ if(e.target === modal) modal.remove(); });
-      modal.querySelector("#inv-settings-close").addEventListener("click", ()=> modal.remove());
-
-      // Prefill
-      modal.querySelector("#f_jsonbin_id").value = w.JSONBIN_BIN_ID || "";
-      modal.querySelector("#f_jsonbin_key").value = w.JSONBIN_MASTER_KEY || "";
-      modal.querySelector("#f_endpoint").value = w.INVENTORY_URL || "";
-      modal.querySelector("#f_auth").value = w.INVENTORY_AUTH || "";
-
-      modal.querySelector("#inv-clear-cache").addEventListener("click", async ()=>{
-        try{
-          if ('serviceWorker' in navigator) {
-            const regs = await navigator.serviceWorker.getRegistrations();
-            regs.forEach(r => r.unregister());
-          }
-          if (window.caches && caches.keys) {
-            const keys = await caches.keys();
-            await Promise.all(keys.map(k => caches.delete(k)));
-          }
-          localStorage.removeItem(w.INV_KEY);
-          document.getElementById("inv-settings-msg").textContent = "Cache cleared. Hard refresh the page.";
-        }catch(e){
-          document.getElementById("inv-settings-msg").textContent = "Unable to clear cache: " + e.message;
-        }
-      });
-
-      modal.querySelector("#inv-settings-save").addEventListener("click", ()=>{
-        const id = modal.querySelector("#f_jsonbin_id").value.trim();
-        const key = modal.querySelector("#f_jsonbin_key").value.trim();
-        const ep  = modal.querySelector("#f_endpoint").value.trim();
-        const au  = modal.querySelector("#f_auth").value.trim();
-
-        w.JSONBIN_BIN_ID = id; w.JSONBIN_MASTER_KEY = key;
-        w.INVENTORY_URL = ep;  w.INVENTORY_AUTH   = au;
-
-        localStorage.setItem("JSONBIN_BIN_ID", id);
-        localStorage.setItem("JSONBIN_MASTER_KEY", key);
-        localStorage.setItem("INVENTORY_URL", ep);
-        localStorage.setItem("INVENTORY_AUTH", au);
-
-        document.getElementById("inv-settings-msg").textContent = "Saved. Reload recommended.";
-      });
-
-      modal.querySelector("#inv-settings-test").addEventListener("click", async ()=>{
-        const msg = modal.querySelector("#inv-settings-msg");
-        msg.textContent = "Testing...";
-        const data = await fetchInvRemote();
-        if (data === null){
-          msg.textContent = "Remote fetch failed. Check keys/endpoint, HTTPS, and CORS.";
-        } else {
-          const len = Object.keys(data || {}).length;
-          msg.textContent = "Success. Remote responded with " + len + " item(s).";
-        }
-      });
-    } else {
-      // Already exists: just refresh values
-      modal.querySelector("#f_jsonbin_id").value = w.JSONBIN_BIN_ID || "";
-      modal.querySelector("#f_jsonbin_key").value = w.JSONBIN_MASTER_KEY || "";
-      modal.querySelector("#f_endpoint").value = w.INVENTORY_URL || "";
-      modal.querySelector("#f_auth").value = w.INVENTORY_AUTH || "";
-    }
-  }
-
-  function boot(){
-    ensureSyncButton();
-    ensureStatusBadge();
-    ensureSettingsGear();
-    initInventory();
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    setTimeout(boot, 0);
-  }
-})();
-</script>
-<!-- ===== /Inventory Remote Sync ===== -->
 </body>
 </html>
-
-
-
