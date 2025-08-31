@@ -865,6 +865,14 @@
 <!-- ===== Inventory Remote Sync: injected by ChatGPT ===== -->
 <script>
 (() => {
+  // ===== JSONBin integration (plug-and-play) =====
+  // Fill these two values and you're done:
+  // 1) Create a free bin at https://jsonbin.io (or use an existing one).
+  // 2) Copy the Bin ID and your X-Master-Key, then paste below.
+  w.JSONBIN_BIN_ID = "YOUR_BIN_ID_HERE";              // e.g., "66d1c0f4e41b4d34e4a2a123"
+  w.JSONBIN_MASTER_KEY = "YOUR_X_MASTER_KEY_HERE";    // e.g., "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+  // ===============================================
+
   // Don't crash if site doesn't have these yet
   const w = window;
 
@@ -890,6 +898,23 @@
 
   // ---------- Remote helpers ----------
   async function fetchInvRemote(){
+    // Prefer JSONBin if configured
+    if (w.JSONBIN_BIN_ID && w.JSONBIN_MASTER_KEY){
+      try{
+        const url = `https://api.jsonbin.io/v3/b/${w.JSONBIN_BIN_ID}/latest`;
+        const res = await fetch(url, { method:"GET", headers:{ "X-Master-Key": w.JSONBIN_MASTER_KEY } });
+        if(!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+        // JSONBin v3 returns {record: {...}, metadata:{...}}
+        const body = (data && data.record) || {};
+        return body;
+      }catch(e){
+        console.warn("[JSONBin] fetch failed, falling back to local:", e);
+        return null;
+      }
+    }
+
+    // Generic remote (former behavior)
     if (!hasRemote()) return null;
     try{
       const res = await fetch(w.INVENTORY_URL, {
@@ -905,113 +930,7 @@
       console.warn("[RemoteInv] fetch failed, falling back to local:", e);
       return null;
     }
-  }
-
-  async function pushInvRemote(obj){
-    if (!hasRemote()) return false;
-    try{
-      const headers = { "Content-Type": "application/json" };
-      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
-
-      let res = await fetch(w.INVENTORY_URL, { method:"PUT", headers, body: JSON.stringify(obj || {}) });
-      if (!res.ok){
-        res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
-      }
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return true;
-    }catch(e){
-      console.warn("[RemoteInv] push failed, keeping local copy:", e);
-      return false;
-    }
-  }
-
-  // ---------- Public API (override existing if present) ----------
-  async function initInventory(){
-    // Start with local so UI isn't blank
-    w.INV_CACHE = loadInvLocal();
-    // Try remote; if OK, prefer it and persist locally
-    const remote = await fetchInvRemote();
-    if (remote && typeof remote === "object"){
-      w.INV_CACHE = remote;
-      saveInvLocal(w.INV_CACHE);
-    }
-  }
-
-  // Keep the same names many codebases already call:
-  w.loadInv = function(){
-    return w.INV_CACHE || {};
-  };
-
-  w.saveInv = async function(inv){
-    w.INV_CACHE = inv || {};
-    saveInvLocal(w.INV_CACHE);
-    w.INV_DIRTY = true;
-    if (hasRemote()){
-      const ok = await pushInvRemote(w.INV_CACHE);
-      if (ok) w.INV_DIRTY = false;
-    }
-    return true;
-  };
-
-  // If original had a setStock(pid,size,qty), wrap/override it to ensure remote push
-  const originalSetStock = w.setStock;
-  w.setStock = function(pid, sizeKey, qty){
-    const inv = w.loadInv();
-    inv[pid] = inv[pid] || {};
-    inv[pid][sizeKey] = (qty === "" || qty === null || typeof qty === "undefined") ? null : Number(qty);
-    // Async but fire-and-forget
-    w.saveInv(inv);
-    if (typeof originalSetStock === "function" && originalSetStock !== w.setStock){
-      try { originalSetStock(pid, sizeKey, qty); } catch {}
-    }
-  };
-
-  w.forceSyncNow = async function(){
-    if (!hasRemote()){ alert("Remote sync not configured. Set INVENTORY_URL."); return; }
-    const ok = await pushInvRemote(w.loadInv());
-    alert(ok ? "Inventory synced to remote." : "Sync failed. Check endpoint/token.");
-  };
-
-  // ---------- UI glue: add a small Sync button & re-render after first remote load ----------
-  function ensureSyncButton(){
-    if (document.getElementById("chatgpt-sync-now")) return;
-    const btn = document.createElement("button");
-    btn.id = "chatgpt-sync-now";
-    btn.textContent = "Sync Inv";
-    btn.style.position = "fixed";
-    btn.style.right = "12px";
-    btn.style.bottom = "12px";
-    btn.style.zIndex = "9999";
-    btn.style.padding = "10px 14px";
-    btn.style.borderRadius = "10px";
-    btn.style.border = "1px solid rgba(0,0,0,.15)";
-    btn.style.background = "#fff";
-    btn.style.cursor = "pointer";
-    btn.title = "Sync inventory to remote JSON endpoint";
-    btn.addEventListener("click", () => w.forceSyncNow());
-    document.body.appendChild(btn);
-  }
-
-  async function boot(){
-    try {
-      await initInventory();
-      // If the page already did an initial render with stale local,
-      // re-render now that remote may be available.
-      if (typeof w.renderCatalog === "function") try { w.renderCatalog(); } catch {}
-      if (typeof w.refresh === "function") try { w.refresh(); } catch {}
-    } catch(e){
-      console.warn("[RemoteInv] init error:", e);
-    } finally {
-      ensureSyncButton();
-    }
-  }
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", boot);
-  } else {
-    setTimeout(boot, 0);
-  }
-})();
+  })();
 </script>
 <!-- ===== /Inventory Remote Sync ===== -->
 </body>
