@@ -191,16 +191,22 @@
         </div>
       </div> <!-- /upi -->
 
-      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
+      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" target="_blank" novalidate>
         <!-- FormSubmit helpers -->
         <input type="hidden" name="_subject" value="New Order — Nitya Enterprises"/>
         <input type="hidden" name="_captcha" value="false"/>
         <input type="hidden" name="_template" value="table"/>
         <input type="hidden" name="order_details" id="order_details"/>
         <input type="hidden" name="order_total" id="order_total"/>
+        <input type="hidden" name="_next" value="https://nityaenterprises2603.github.io/ecommerce-site/#thanks" />
 
         <label for="custName">Customer Name</label>
         <input id="custName" name="customer_name" placeholder="Your full name" required />
+
+        
+
+        <label for="custEmail">Customer Email</label>
+        <input id="custEmail" type="email" name="email" placeholder="you@example.com" required />
 
         <label for="mobile">Customer Mobile No (10 digits)</label>
         <input id="mobile" name="customer_mobile" inputmode="numeric" pattern="[0-9]{10}" placeholder="e.g., 9510683160" required />
@@ -634,8 +640,12 @@
     /* ===== Form validation (basic) ===== */
     document.getElementById('orderForm').addEventListener('submit', (e)=>{
       if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
+      const emailEl = document.getElementById('custEmail');
+      if(!emailEl || !emailEl.checkValidity()){ e.preventDefault(); alert('Please enter a valid email address.'); return; }
       if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10-digit mobile number.'); return; }
-    });
+      if(!(document.getElementById('custName').value||'').trim()){ e.preventDefault(); alert('Please enter your name.'); return; }
+      if(!(document.getElementById('addr').value||'').trim()){ e.preventDefault(); alert('Please enter your address.'); return; }
+});
 
     // Init
     document.getElementById('yr').textContent = new Date().getFullYear();
