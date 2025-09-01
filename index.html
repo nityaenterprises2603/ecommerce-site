@@ -135,7 +135,6 @@
       <a href="#Anklets">Anklets</a>
       <a href="#Bangles">Bangles</a>
       <a href="#Bracelets">Bracelets</a>
-	  <a href="#Mangalsutra">Mangalsutra</a
       
     </div>
 
@@ -145,7 +144,6 @@
     <div id="Anklets"><h3>Anklets</h3><div class="grid" data-grid="Anklets"></div></div>
     <div id="Bangles"><h3>Bangles</h3><div class="grid" data-grid="Bangles"></div></div>
     <div id="Bracelets"><h3>Bracelets</h3><div class="grid" data-grid="Bracelets"></div></div>
-	 <div id="Mangalsutra"><h3>Mangalsutra</h3><div class="grid" data-grid="Mangalsutra"></div></div>
    
   </section>
 
@@ -271,8 +269,8 @@
     const SELLER_WHATSAPP = "+919510683160"; // WhatsApp in international format
     const UPI_ID = "7990639743@ybl";         // Your VPA
     const PAYEE_NAME = "Nitya Enterprises";  // Appears in UPI apps
-    // Global: size selection disabled
-    const SIZE_BAR_DISABLED = true; // enforce Free Size flow
+    // Global: size selection disabled (kept as in your file)
+    const SIZE_BAR_DISABLED = true;
     const FREE_SIZE_LABEL = "Free Size";
 
     /* ===== Catalog with size options where applicable ===== */
@@ -374,7 +372,6 @@
  
 
       {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
-	  {id:"man-01", name:"Mangalsutra", price:449, cat:"Mangalsutra", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
       
 
       // Traditional Clothing — sizes default to S/M/L/XL/XXL
@@ -425,7 +422,7 @@
       "Chaniya Choli": [ "Free Size","S","M","L","XL","XXL"], 
       "Kurtis": [ "Free Size","S","M","L","XL","XXL"],
       "Kurta": [ "Free Size","S","M","L","XL","XXL"],
-      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"] // added per your spec
+      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"] // as per your spec
     };
 
     /* ===== State for per-product selected size ===== */
@@ -446,12 +443,16 @@
         let sizeBlock = '';
         const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || [ ]);
         if (availSizes.length) {
-         const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
+          const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
+          
+          // HINT: show "Currently Available Size: Free Size" for categories EXCEPT Bangles
+          const hint = (p.cat === "Bangles") ? "" : `<div class="size-hint"><strong> Currently Available Size:</strong> ${ FREE_SIZE_LABEL}</div>`;
+
           sizeBlock = `
             <div class="sizes" role="group" aria-label="Select size">
               ${opts}
             </div>
-            <div class="size-hint"><strong> Currently Available Size:</strong> ${ FREE_SIZE_LABEL}</div>`;
+            ${hint}`;
         }
 
         card.innerHTML = `
@@ -530,7 +531,6 @@
         cartList.appendChild(row);
       });
 
-      // FIXED: no raw newline inside string literals
       const lines = items.map(it => `• ${it.name}${it.size ? ' (Size ' + it.size + ')' : ''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
       const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
       orderSummary.value = summaryText;
@@ -643,86 +643,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
