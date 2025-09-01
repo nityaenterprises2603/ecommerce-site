@@ -6,8 +6,6 @@
   <title>Nitya Enterprises — E-Commerce</title>
   <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
   <style>
-.size-btn:disabled { text-decoration: line-through; opacity: .55; cursor: not-allowed; }
-
     :root{
       --maroon:#6A0D25;       /* maroon wine */
       --orange:#FF6600;       /* orange */
@@ -116,9 +114,7 @@
         <button class="bucket-btn" id="openBucket" title="Open Bucket" aria-haspopup="dialog">
           🧺 Bucket <span class="count" id="bucketCount">0</span>
         </button>
-      
-<button class="bucket-btn" id="openInventory" title="Edit Inventory">📦 Inventory</button>
-</nav>
+      </nav>
     </div>
   </header>
 
@@ -139,6 +135,7 @@
       <a href="#Anklets">Anklets</a>
       <a href="#Bangles">Bangles</a>
       <a href="#Bracelets">Bracelets</a>
+	  <a href="#Mangalsutra">Mangalsutra</a
       
     </div>
 
@@ -148,6 +145,7 @@
     <div id="Anklets"><h3>Anklets</h3><div class="grid" data-grid="Anklets"></div></div>
     <div id="Bangles"><h3>Bangles</h3><div class="grid" data-grid="Bangles"></div></div>
     <div id="Bracelets"><h3>Bracelets</h3><div class="grid" data-grid="Bracelets"></div></div>
+	 <div id="Mangalsutra"><h3>Mangalsutra</h3><div class="grid" data-grid="Mangalsutra"></div></div>
    
   </section>
 
@@ -191,22 +189,16 @@
         </div>
       </div> <!-- /upi -->
 
-      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" target="_blank" novalidate>
+      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
         <!-- FormSubmit helpers -->
         <input type="hidden" name="_subject" value="New Order — Nitya Enterprises"/>
         <input type="hidden" name="_captcha" value="false"/>
         <input type="hidden" name="_template" value="table"/>
         <input type="hidden" name="order_details" id="order_details"/>
         <input type="hidden" name="order_total" id="order_total"/>
-        <input type="hidden" name="_next" value="https://nityaenterprises2603.github.io/ecommerce-site/#thanks" />
 
         <label for="custName">Customer Name</label>
         <input id="custName" name="customer_name" placeholder="Your full name" required />
-
-        
-
-        <label for="custEmail">Customer Email</label>
-        <input id="custEmail" type="email" name="email" placeholder="you@example.com" required />
 
         <label for="mobile">Customer Mobile No (10 digits)</label>
         <input id="mobile" name="customer_mobile" inputmode="numeric" pattern="[0-9]{10}" placeholder="e.g., 9510683160" required />
@@ -382,6 +374,7 @@
  
 
       {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
+	  {id:"man-01", name:"Mangalsutra", price:449, cat:"Mangalsutra", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
       
 
       // Traditional Clothing — sizes default to S/M/L/XL/XXL
@@ -640,197 +633,14 @@
     /* ===== Form validation (basic) ===== */
     document.getElementById('orderForm').addEventListener('submit', (e)=>{
       if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
-      const emailEl = document.getElementById('custEmail');
-      if(!emailEl || !emailEl.checkValidity()){ e.preventDefault(); alert('Please enter a valid email address.'); return; }
       if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10-digit mobile number.'); return; }
-      if(!(document.getElementById('custName').value||'').trim()){ e.preventDefault(); alert('Please enter your name.'); return; }
-      if(!(document.getElementById('addr').value||'').trim()){ e.preventDefault(); alert('Please enter your address.'); return; }
-});
+    });
 
     // Init
     document.getElementById('yr').textContent = new Date().getFullYear();
     renderCatalog();
     refresh();
   </script>
-<div class="drawer" id="inventoryDrawer" role="dialog" aria-modal="true" aria-labelledby="invTitle" style="border-left-color:#14532d">
-  <header class="wrap" style="padding:12px 16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
-      <h4 id="invTitle">Inventory (manual)</h4>
-      <button class="btn" id="closeInventory">Close ✕</button>
-    </div>
-  </header>
-  <div class="body pad">
-    <p class="muted" style="margin-top:0">
-      Paste/edit JSON below and click <strong>Save</strong>. Tip: press <code class="kbd">Shift</code>+<code class="kbd">I</code> anywhere to open this quickly.
-    </p>
-    <textarea id="inventoryJson" style="width:100%;min-height:280px;font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"></textarea>
-    <div class="actions" style="margin-top:12px;display:flex;gap:8px;align-items:center">
-      <button class="cta" id="saveInventory">Save</button>
-      <button class="btn" id="reloadInventory" type="button">Reload</button>
-      <button class="btn" id="resetInventory" type="button">Reset to defaults</button>
-      <label style="display:flex;align-items:center;gap:8px;margin-left:auto">
-        <input type="checkbox" id="deductOnSubmit" />
-        Deduct stock on email submit
-      </label>
-    </div>
-  </div>
-</div>
-<script>
-/* ===== INVENTORY (per product and per size) — no API, saved in localStorage ===== */
-(function(){
-  const INVENTORY_KEY = 'nitya_inventory_v1';
-  const DEDUCT_FLAG_KEY = 'nitya_inventory_deduct_on_submit_v1';
-
-  const defaultInventory = {
-    "ring-01": { sizes: { "Free Size": 5, "6": 2, "7": 0, "8": 3 } },
-    "ban-09":  { sizes: { "2.4": 10, "2.6": 0, "2.8": 4, "2.10": 1, "2.12": 0 } },
-    "cc-01":   { sizes: { "S": 1, "M": 2, "L": 0, "XL": 1, "XXL": 0, "Free Size": 3 } },
-    "ear-01":  { stock: 12 }
-  };
-
-  function loadInventory(){
-    try {
-      const raw = localStorage.getItem(INVENTORY_KEY);
-      return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(defaultInventory));
-    } catch(e){
-      return JSON.parse(JSON.stringify(defaultInventory));
-    }
-  }
-  function saveInventory(inv){
-    localStorage.setItem(INVENTORY_KEY, JSON.stringify(inv));
-  }
-  let INVENTORY = loadInventory();
-
-  function loadDeductFlag(){ return localStorage.getItem(DEDUCT_FLAG_KEY) === '1'; }
-  function saveDeductFlag(v){ localStorage.setItem(DEDUCT_FLAG_KEY, v ? '1' : '0'); }
-
-  // Helpers
-  window.getStock = function(pid, size){
-    const item = INVENTORY[pid];
-    if(!item) return Infinity;
-    if(item.stock != null && size == null) return item.stock;
-    if(item.sizes && size != null && item.sizes[size] != null) return item.sizes[size];
-    if(item.sizes && size != null) return 0;
-    if(item.stock != null) return item.stock;
-    return Infinity;
-  };
-  window.setStock = function(pid, size, newQty){
-    if(!INVENTORY[pid]) INVENTORY[pid] = size ? { sizes:{} } : { stock:0 };
-    if(size){
-      if(!INVENTORY[pid].sizes) INVENTORY[pid].sizes = {};
-      INVENTORY[pid].sizes[size] = Math.max(0, Number(newQty||0));
-    }else{
-      INVENTORY[pid].stock = Math.max(0, Number(newQty||0));
-    }
-    saveInventory(INVENTORY);
-  };
-  window.decreaseStock = function(pid, size, qty){
-    const current = window.getStock(pid, size);
-    if(current === Infinity) return;
-    window.setStock(pid, size, Math.max(0, current - qty));
-  };
-  window.inCartQty = window.inCartQty || function(){ return 0; }; // will be overridden if exists elsewhere
-  window.canAddOne = function(pid, size){
-    const stk = window.getStock(pid, size);
-    if(stk === Infinity) return true;
-    const inCart = (typeof window.inCartQty === 'function') ? window.inCartQty(pid, size) : 0;
-    return inCart + 1 <= stk;
-  };
-
-  // Wire up Inventory admin drawer
-  document.addEventListener('DOMContentLoaded', function(){
-    const invDrawer = document.getElementById('inventoryDrawer');
-    const openInv = document.getElementById('openInventory');
-    const closeInv = document.getElementById('closeInventory');
-    const invText = document.getElementById('inventoryJson');
-    const saveInvBtn = document.getElementById('saveInventory');
-    const reloadInvBtn = document.getElementById('reloadInventory');
-    const resetInvBtn = document.getElementById('resetInventory');
-    const deductChk = document.getElementById('deductOnSubmit');
-
-    function openInventoryUI(){
-      if(!invDrawer) return;
-      invText.value = JSON.stringify(INVENTORY, null, 2);
-      if(deductChk) deductChk.checked = loadDeductFlag();
-      invDrawer.classList.add('open');
-    }
-    function closeInventoryUI(){ if(invDrawer) invDrawer.classList.remove('open'); }
-
-    if(openInv) openInv.addEventListener('click', openInventoryUI);
-    if(closeInv) closeInv.addEventListener('click', closeInventoryUI);
-    if(reloadInvBtn) reloadInvBtn.addEventListener('click', ()=> invText.value = JSON.stringify(INVENTORY, null, 2));
-    if(resetInvBtn) resetInvBtn.addEventListener('click', ()=>{
-      if(confirm('Reset inventory to defaults? This overwrites current stock.')){
-        INVENTORY = JSON.parse(JSON.stringify(defaultInventory));
-        saveInventory(INVENTORY);
-        invText.value = JSON.stringify(INVENTORY, null, 2);
-        try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
-      }
-    });
-    if(saveInvBtn) saveInvBtn.addEventListener('click', ()=>{
-      try{
-        const parsed = JSON.parse(invText.value);
-        INVENTORY = parsed;
-        saveInventory(INVENTORY);
-        if(deductChk) saveDeductFlag(deductChk.checked);
-        try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(e){}
-        alert('Inventory saved.');
-      }catch(err){
-        alert('Invalid JSON. Please fix and try again.');
-      }
-    });
-    document.addEventListener('keydown', (e)=>{
-      if(e.shiftKey && (e.key.toLowerCase() === 'i')){ e.preventDefault(); openInventoryUI(); }
-    });
-
-    // Hook into order submit to optionally deduct stock
-    const orderForm = document.getElementById('orderForm');
-    if(orderForm){
-      orderForm.addEventListener('submit', function(e){
-        // If earlier validation blocked submission, do nothing
-        if (e.defaultPrevented) return;
-        if(loadDeductFlag() && typeof window.cartItems === 'function'){
-          const items = window.cartItems();
-          items.forEach(it => {
-            window.decreaseStock(it.id, it.size || null, it.qty);
-          });
-          saveInventory(INVENTORY);
-          try{ if(typeof renderCatalog === 'function') renderCatalog(); }catch(err){}
-          // Optionally clear the cart AFTER submission click
-          if(typeof window.clearCart === 'function') window.clearCart();
-        }
-      }); // bubble phase (after validation)
-    }
-}
-  });
-
-  // Patch render of size buttons if renderCatalog exists later
-  const _origRender = window.renderCatalog;
-  window.renderCatalog = function(){
-    if(typeof _origRender === 'function') _origRender();
-
-    // After original rendering, annotate size buttons with stock and disable OOS
-    const sizeBtns = document.querySelectorAll('.size-btn[data-for][data-size]');
-    sizeBtns.forEach(btn => {
-      const pid = btn.getAttribute('data-for');
-      const sz = btn.getAttribute('data-size');
-      const stk = window.getStock(pid, sz);
-      const base = sz;
-      const label = (stk === Infinity) ? base : (stk <= 0 ? `${base} (out)` : `${base} (${stk})`);
-      btn.innerText = label;
-      if(stk !== Infinity && stk <= 0){
-        btn.disabled = true;
-        btn.style.textDecoration = 'line-through';
-        btn.style.opacity = '.6';
-      }else{
-        btn.disabled = false;
-        btn.style.textDecoration = '';
-        btn.style.opacity = '';
-      }
-    });
-  };
-})();
-</script>
 </body>
 </html>
 
