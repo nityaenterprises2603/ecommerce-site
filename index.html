@@ -112,20 +112,13 @@
     .danger{color:var(--oos)}
   </style>
 </head>
-<body>
+\1
 
-  
+  <!-- Inventory endpoint config (inserted) -->
   <script>
-    /* === Backend config (your live values) === */
-    window.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec"; // <-- your /exec URL
-    window.INVENTORY_AUTH = "";      // keep empty unless you implement your own token check in Apps Script
-    window.SHEET_NAME = "Inventory"; // for reference only (front-end doesn't use this value directly)
-
-    // FYI only (not used by the front-end; helpful for your notes)
-    window.DEPLOYMENT_ID = "AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan";
-    window.APPS_SCRIPT_LIBRARY = "1HVlVKZv_P-jpcySRmz7fCWsnwt2dG8E6kBDnEIJqZW8sRgd27fYm18CW/1";
+    window.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbzxn6fFwKTMyLt8_XPQxD3BEH12wQ0SHbZCRf7cRXGONzYp4ZRQ0PzfvmHv6dH58vce/exec";
+    window.INVENTORY_AUTH = "";
   </script>
-
 
   <header>
     <div class="wrap nav">
@@ -334,13 +327,7 @@
     const INV_KEY  = 'nitya_inventory_v1';    // { [pid]: { [sizeKey]: number|null }, ... }
     const ADMIN_PASS = 'nitya@123';
 
-    /* URL helper: encode each path segment (spaces -> %20 etc.) */
-    function urlFrom(path){
-      if(/^https?:\\/\\//i.test(path)) return path;
-      return path.split('/').map(seg => encodeURIComponent(seg)).join('/');
-    }
-
-    /* ===== Catalog (same items as before) ===== */
+    /* ===== Catalog (same items, cleaned paths/spaces) ===== */
     const catalog = [
       {id:"ear-01", name:"German Silver Premium Quality Earings -a", price:400, cat:"Earrings", img:"assets/earrings images/E-1.jpeg"},
       {id:"ear-02", name:"German Silver Premium Quality Earings -b", price:420, cat:"Earrings", img:"assets/earrings images/E-2.jpeg"},
@@ -475,9 +462,9 @@
       {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
     ];
 
-    // Default sizes if product has none (FIXED SYNTAX)
+    // Default sizes if product has none
     const DEFAULT_SIZES = {
-      "Earrings": ["Free Size"],
+      "Earrings":[ "Free Size,"6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"],
       "Chaniya Choli": ["Free Size","S","M","L","XL","XXL"],
       "Kurtis": ["Free Size","S","M","L","XL","XXL"],
       "Kurta": ["Free Size","S","M","L","XL","XXL"],
@@ -495,24 +482,13 @@
       catch{ return {}; }
     }
     function saveInv(inv){ localStorage.setItem(INV_KEY, JSON.stringify(inv)); }
-
-    // For cards — if only Free Size, treat as no-size (no chips)
     function sizeKeysFor(p){
       const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
-      if (sizes.length === 1 && sizes[0] === FREE_SIZE_LABEL) return []; // no chip UI
       return sizes.length ? sizes : ['_']; // '_' means one-size/no-size
     }
-    // For Admin editor — always present at least one key
-    function adminSizeKeysFor(p){
-      const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
-      if (sizes.length === 0 || (sizes.length === 1 && sizes[0] === FREE_SIZE_LABEL)) return ['_'];
-      return sizes;
-    }
-
     function getStock(pid, sizeKey){
       const inv = loadInv();
-      const k = sizeKey ?? '_';
-      const v = inv?.[pid]?.[k];
+      const v = inv?.[pid]?.[sizeKey ?? '_'];
       // blank/undefined => unlimited
       if (v === undefined || v === null || v === '') return Infinity;
       const n = Number(v);
@@ -526,8 +502,7 @@
     }
     function productHasSizes(p){
       const sizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || []);
-      const real = sizes.filter(s => s !== FREE_SIZE_LABEL);
-      return real.length > 0;
+      return sizes.length > 0;
     }
 
     /* ==============================
@@ -552,15 +527,16 @@
               ${sz}<span class="stock-dot" aria-hidden="true"></span>
             </button>`;
           }).join('');
-          sizeBlock = `<div class="sizes" role="group" aria-label="Select size">${opts}</div>`;
-        } else {
-          // Free Size — no size chips, just a hint
-          sizeBlock = `<div class="size-hint"><strong>${FREE_SIZE_LABEL}</strong></div>`;
+          const hint = (p.cat === "Bangles") ? "" : `<div class="size-hint"><strong>Currently Available Size:</strong> ${FREE_SIZE_LABEL}</div>`;
+          sizeBlock = `
+            <div class="sizes" role="group" aria-label="Select size">
+              ${opts}
+            </div>
+            ${hint}`;
         }
 
-        const safeSrc = urlFrom(p.img);
         card.innerHTML = `
-          <img class="thumb" src="${safeSrc}" alt="${p.name}" onerror="this.onerror=null;this.src='https://via.placeholder.com/800x600?text=Image+not+found';"/>
+          <img class="thumb" src="${p.img}" alt="${p.name}"/>
           <div class="pad">
             <div class="title">${p.name}</div>
             <div class="price">₹${p.price.toLocaleString()}</div>
@@ -601,6 +577,7 @@
       const now = cart[cid] || 0;
       if (now + qty > max){
         alert(max === Infinity ? 'Unlimited stock — unexpected cap' : `Only ${max} left for this size.`);
+        // If some left, allow up to max
         if (max > now){ cart[cid] = max; }
         saveCart(); refresh(); return;
       }
@@ -657,9 +634,8 @@
         const sizeText = it.size ? ` <span class="small">(Size ${it.size})</span>` : '';
         const left = getStock(it.id, it.size || '_');
         const remaining = (left===Infinity) ? '∞' : (left - it.qty);
-        const safeSrc = urlFrom(it.img);
         row.innerHTML = `
-          <img src="${safeSrc}" alt="${it.name}" onerror="this.onerror=null;this.src='https://via.placeholder.com/112x84?text=No+img';">
+          <img src="${it.img}" alt="${it.name}">
           <div>
             <div class="title">${it.name}${sizeText}</div>
             <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()} • Left: ${remaining < 0 ? 0 : remaining}</div>
@@ -672,7 +648,7 @@
       });
 
       const lines = items.map(it => `• ${it.name}${it.size ? ' (Size ' + it.size + ')' : ''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
-      const summaryText = (lines.join('\\n') || 'No items in bucket') + `\\n\\nTotal: ₹${total.toLocaleString()}`;
+      const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
       orderSummary.value = summaryText;
       hiddenDetails.value = summaryText;
       hiddenTotal.value = total;
@@ -691,7 +667,7 @@
         const sz = sizeBtn.getAttribute('data-size');
         selectedSize.set(pid, sz);
         const card = sizeBtn.closest('.card');
-        card.querySelectorAll(\`.size-btn[data-for="\${pid}"]\`).forEach(b=>b.setAttribute('aria-pressed','false'));
+        card.querySelectorAll(`.size-btn[data-for="${pid}"]`).forEach(b=>b.setAttribute('aria-pressed','false'));
         sizeBtn.setAttribute('aria-pressed','true');
       }
 
@@ -705,10 +681,11 @@
         if(needSizes){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
+          // stock gate here as well
           const left = getStock(pid, sel);
           const inCart = cartQtyFor(pid, sel);
           if (inCart + 1 > left){ alert(left===Infinity?'':'Only '+left+' left for this size.'); return; }
-          addItem(\`\${pid}__\${sel}\`,1);
+          addItem(`${pid}__${sel}`,1);
         }else{
           const left = getStock(pid, '_');
           const inCart = cartQtyFor(pid, null);
@@ -723,7 +700,7 @@
         if(needSizes){
           const sel = selectedSize.get(pid);
           if(!sel){ alert('Select a size to remove.'); return; }
-          removeItem(\`\${pid}__\${sel}\`,1);
+          removeItem(`${pid}__${sel}`,1);
         }else{
           removeItem(pid,1);
         }
@@ -747,13 +724,13 @@
 
     function upiUrl(amount){
       const params = new URLSearchParams({ pa: UPI_ID, pn: PAYEE_NAME, am: String(amount||''), cu: 'INR' });
-      return \`upi://pay?\${params.toString()}\`;
+      return `upi://pay?${params.toString()}`;
     }
     function updateUpi(amount){
       upiDeepLink.href = upiUrl(amount);
       const data = encodeURIComponent(upiUrl(amount));
-      const src = \`https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=\${data}\`;
-      qrBox.innerHTML = \`<img alt="UPI QR Code" width="220" height="220" style="width:100%;height:100%;object-fit:contain" src="\${src}">\`;
+      const src = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${data}`;
+      qrBox.innerHTML = `<img alt="UPI QR Code" width="220" height="220" style="width:100%;height:100%;object-fit:contain" src="${src}">`;
     }
     copyUpiBtn.addEventListener('click', ()=>{
       navigator.clipboard.writeText(UPI_ID).then(()=>{
@@ -770,10 +747,10 @@
       const alt = document.getElementById('altContact').value || '-';
       const address = document.getElementById('addr').value || '(No address)';
       const notes = document.getElementById('notes').value || '-';
-      const text = `*New Order — Nitya Enterprises*\\n\\n`+
-        `*Customer:* ${name}\\n*Mobile:* ${mobile}\\n*Alt:* ${alt}\\n*Address:* ${address}\\n*Notes:* ${notes}\\n\\n`+
+      const text = `*New Order — Nitya Enterprises*\n\n`+
+        `*Customer:* ${name}\n*Mobile:* ${mobile}\n*Alt:* ${alt}\n*Address:* ${address}\n*Notes:* ${notes}\n\n`+
         `${orderSummary.value}`;
-      const url = \`https://wa.me/${SELLER_WHATSAPP}?text=\${encodeURIComponent(text)}\`;
+      const url = `https://wa.me/${SELLER_WHATSAPP}?text=${encodeURIComponent(text)}`;
       window.open(url,'_blank','noopener');
     });
 
@@ -796,8 +773,10 @@
     const resetInvBtn = document.getElementById('resetInv');
 
     function openAdmin(){
+      // simple passcode
       const code = prompt('nitya@123:');
       if(code !== ADMIN_PASS){ alert('Wrong passcode.'); return; }
+      // populate product list
       productPick.innerHTML = catalog.map(p=>`<option value="${p.id}">${p.name} — [${p.cat}]</option>`).join('');
       renderSizeInputs(productPick.value);
       adminModal.classList.add('open');
@@ -816,7 +795,7 @@
     function renderSizeInputs(pid){
       sizesEditor.innerHTML = '';
       const p = catalog.find(x=>x.id===pid);
-      const keys = adminSizeKeysFor(p);
+      const keys = sizeKeysFor(p);
       const inv = loadInv();
       const obj = inv[pid] || {};
       keys.forEach(k=>{
@@ -891,18 +870,18 @@
     refresh();
   </script>
 
-
-<!-- ===== Inventory Remote Sync: injected by ChatGPT (tweaked v2 - CORS safe) ===== -->
+<!-- ===== Inventory Remote Sync: injected by ChatGPT ===== -->
 <script>
 (() => {
+  // Don't crash if site doesn't have these yet
   const w = window;
 
   // ---------- Config (override-ready) ----------
-  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec";
-  // Leave auth empty unless you build your own token logic on server:
-  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "";
-  if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";
+  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec";         // ← put your JSON endpoint here
+  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "nitya@123 ";       // ← optional: "Bearer <token>"
+  if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";   // local cache key
 
+  // Keep a fast in-memory cache
   if (w.INV_CACHE === undefined) w.INV_CACHE = {};
   if (w.INV_DIRTY === undefined) w.INV_DIRTY = false;
 
@@ -921,9 +900,10 @@
   async function fetchInvRemote(){
     if (!hasRemote()) return null;
     try{
-      // Avoid preflight by sending a simple GET with no custom headers and cache buster
-      const url = w.INVENTORY_URL + "?_=" + Date.now();
-      const res = await fetch(url, { method: "GET" });
+      const res = await fetch(w.INVENTORY_URL, {
+        method: "GET",
+        headers: w.INVENTORY_AUTH ? { "Authorization": w.INVENTORY_AUTH } : {}
+      });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       const body = (data && data.record) || (data && data.data) || data;
@@ -938,9 +918,13 @@
   async function pushInvRemote(obj){
     if (!hasRemote()) return false;
     try{
-      // Use text/plain to AVOID CORS preflight on Apps Script
-      const headers = { "Content-Type": "text/plain" };
-      const res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
+      const headers = { "Content-Type": "application/json" };
+      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
+
+      let res = await fetch(w.INVENTORY_URL, { method:"PUT", headers, body: JSON.stringify(obj || {}) });
+      if (!res.ok){
+        res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
+      }
       if (!res.ok) throw new Error("HTTP " + res.status);
       return true;
     }catch(e){
@@ -949,9 +933,11 @@
     }
   }
 
-  // ---------- Public API ----------
+  // ---------- Public API (override existing if present) ----------
   async function initInventory(){
+    // Start with local so UI isn't blank
     w.INV_CACHE = loadInvLocal();
+    // Try remote; if OK, prefer it and persist locally
     const remote = await fetchInvRemote();
     if (remote && typeof remote === "object"){
       w.INV_CACHE = remote;
@@ -959,6 +945,7 @@
     }
   }
 
+  // Keep the same names many codebases already call:
   w.loadInv = function(){
     return w.INV_CACHE || {};
   };
@@ -974,12 +961,14 @@
     return true;
   };
 
+  // If original had a setStock(pid,size,qty), wrap/override it to ensure remote push
   const originalSetStock = w.setStock;
   w.setStock = function(pid, sizeKey, qty){
     const inv = w.loadInv();
     inv[pid] = inv[pid] || {};
     inv[pid][sizeKey] = (qty === "" || qty === null || typeof qty === "undefined") ? null : Number(qty);
-    w.saveInv(inv); // async push
+    // Async but fire-and-forget
+    w.saveInv(inv);
     if (typeof originalSetStock === "function" && originalSetStock !== w.setStock){
       try { originalSetStock(pid, sizeKey, qty); } catch {}
     }
@@ -991,6 +980,7 @@
     alert(ok ? "Inventory synced to remote." : "Sync failed. Check endpoint/token.");
   };
 
+  // ---------- UI glue: add a small Sync button & re-render after first remote load ----------
   function ensureSyncButton(){
     if (document.getElementById("chatgpt-sync-now")) return;
     const btn = document.createElement("button");
@@ -1013,6 +1003,8 @@
   async function boot(){
     try {
       await initInventory();
+      // If the page already did an initial render with stale local,
+      // re-render now that remote may be available.
       if (typeof w.renderCatalog === "function") try { w.renderCatalog(); } catch {}
       if (typeof w.refresh === "function") try { w.refresh(); } catch {}
     } catch(e){
@@ -1030,6 +1022,10 @@
 })();
 </script>
 <!-- ===== /Inventory Remote Sync ===== -->
-<!-- ===== /Inventory Remote Sync ===== -->
 </body>
 </html>
+
+
+
+
+
