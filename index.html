@@ -88,7 +88,25 @@
     .subnav a{background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;text-decoration:none}
     .subnav a:hover{border-color:var(--orange)}
     @media (max-width:720px){ .upi{grid-template-columns:1fr} }
-  </style>
+  
+/* ==== Stock Manager Login Modal ==== */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;z-index:80}
+.modal-backdrop.open{display:block}
+.modal{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:81;
+  padding:16px;pointer-events:none;
+}
+.modal .card{
+  pointer-events:auto;background:#fff;border:1px solid var(--ring);border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.18);max-width:360px;width:100%;padding:16px;
+}
+.modal .row{display:flex;gap:8px;align-items:center}
+.modal .title{font-weight:800;margin:0 0 6px;color:var(--maroon)}
+.modal input[type="password"], .modal input[type="text"]{width:100%;padding:10px;border:1px solid var(--ring);border-radius:10px}
+.modal .err{color:#b91c1c;font-size:.9rem;min-height:1.2em;margin:4px 0 0}
+.modal .actions{display:flex;gap:8px;margin-top:10px}
+
+</style>
 </head>
 <body>
   <header>
@@ -277,7 +295,27 @@
     </div>
   </div>
 
-  <script>
+  
+<!-- Stock Manager Login Modal -->
+<div class="modal-backdrop" id="smBackdrop"></div>
+<div class="modal" id="smModal" aria-hidden="true" aria-labelledby="smTitle" role="dialog">
+  <div class="card">
+    <h4 class="title" id="smTitle">Enter Password</h4>
+    <p class="muted" style="margin:0 0 10px">Stock Manager is protected.</p>
+    <div class="row">
+      <input type="password" id="smPass" placeholder="Password" autocomplete="current-password" />
+      <button class="btn" id="smToggle" type="button" aria-label="Show password">👁️</button>
+    </div>
+    <div class="err" id="smErr"></div>
+    <div class="actions">
+      <button class="btn bucket" id="smLogin" type="button">Login</button>
+      <button class="btn" id="smCancel" type="button">Cancel</button>
+    </div>
+    <p class="muted" style="margin-top:6px">Tip: access is remembered for this browser tab.</p>
+  </div>
+</div>
+
+<script>
     /* ==============================
        QUICK SETUP
        ============================== */
@@ -549,7 +587,13 @@
     const add10 = document.getElementById('add10');
     const zeroStock = document.getElementById('zeroStock');
 
-    openStock.addEventListener('click', ()=>{ buildProductList(); stockDrawer.classList.add('open'); });
+    openStock.addEventListener('click', ()=>{
+  if (sessionStorage.getItem('nitya_stock_auth') === '1') {
+    buildProductList(); stockDrawer.classList.add('open');
+  } else {
+    openSmLogin();
+  }
+});
     closeStock.addEventListener('click', ()=>stockDrawer.classList.remove('open'));
 
     function buildProductList(){
@@ -658,6 +702,52 @@
     document.getElementById('yr').textContent = new Date().getFullYear();
     renderCatalog();
     refresh();
-  </script>
+  
+/* ===== Stock Manager Password Gate ===== */
+const SM_PASS = "nitya@123"; // change here if you ever rotate the password
+const smBackdrop = document.getElementById('smBackdrop');
+const smModal = document.getElementById('smModal');
+const smPass = document.getElementById('smPass');
+const smErr = document.getElementById('smErr');
+const smLoginBtn = document.getElementById('smLogin');
+const smCancelBtn = document.getElementById('smCancel');
+const smToggle = document.getElementById('smToggle');
+
+function openSmLogin(){
+  smErr.textContent = '';
+  smPass.value = '';
+  smBackdrop.classList.add('open');
+  smModal.setAttribute('aria-hidden','false');
+  smPass.type = 'password';
+  smToggle.textContent = '👁️';
+  setTimeout(()=> smPass.focus(), 0);
+}
+function closeSmLogin(){
+  smBackdrop.classList.remove('open');
+  smModal.setAttribute('aria-hidden','true');
+}
+function trySmLogin(){
+  const val = smPass.value.trim();
+  if (val === SM_PASS){
+    sessionStorage.setItem('nitya_stock_auth','1');
+    closeSmLogin();
+    buildProductList(); stockDrawer.classList.add('open');
+  } else {
+    smErr.textContent = 'Incorrect password.';
+    smPass.select();
+  }
+}
+
+smLoginBtn?.addEventListener('click', trySmLogin);
+smCancelBtn?.addEventListener('click', closeSmLogin);
+smToggle?.addEventListener('click', ()=>{
+  smPass.type = (smPass.type === 'password') ? 'text' : 'password';
+  smToggle.textContent = (smPass.type === 'password') ? '👁️' : '🙈';
+  smPass.focus();
+});
+smPass?.addEventListener('keydown', (e)=>{ if(e.key==='Enter') trySmLogin(); });
+smBackdrop?.addEventListener('click', closeSmLogin);
+
+</script>
 </body>
 </html>
