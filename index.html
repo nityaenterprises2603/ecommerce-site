@@ -113,6 +113,20 @@
   </style>
 </head>
 <body>
+
+  
+  <script>
+    /* === Backend config (your live values) === */
+    window.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec"; // <-- your /exec URL
+    window.INVENTORY_AUTH = "";      // keep empty unless you implement your own token check in Apps Script
+    window.SHEET_NAME = "Inventory"; // for reference only (front-end doesn't use this value directly)
+
+    // FYI only (not used by the front-end; helpful for your notes)
+    window.DEPLOYMENT_ID = "AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan";
+    window.APPS_SCRIPT_LIBRARY = "1HVlVKZv_P-jpcySRmz7fCWsnwt2dG8E6kBDnEIJqZW8sRgd27fYm18CW/1";
+  </script>
+
+
   <header>
     <div class="wrap nav">
       <div class="brand">
@@ -877,15 +891,16 @@
     refresh();
   </script>
 
-<!-- ===== Inventory Remote Sync: injected by ChatGPT (tweaked) ===== -->
+
+<!-- ===== Inventory Remote Sync: injected by ChatGPT (tweaked v2 - CORS safe) ===== -->
 <script>
 (() => {
   const w = window;
 
   // ---------- Config (override-ready) ----------
   if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec";
-  // Remove stray space; often Apps Script doesn't need Authorization:
-  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "";  // e.g., "Bearer <token>" if you add one
+  // Leave auth empty unless you build your own token logic on server:
+  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "";
   if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";
 
   if (w.INV_CACHE === undefined) w.INV_CACHE = {};
@@ -906,9 +921,9 @@
   async function fetchInvRemote(){
     if (!hasRemote()) return null;
     try{
-      const headers = {};
-      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
-      const res = await fetch(w.INVENTORY_URL, { method: "GET", headers });
+      // Avoid preflight by sending a simple GET with no custom headers and cache buster
+      const url = w.INVENTORY_URL + "?_=" + Date.now();
+      const res = await fetch(url, { method: "GET" });
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       const body = (data && data.record) || (data && data.data) || data;
@@ -923,13 +938,9 @@
   async function pushInvRemote(obj){
     if (!hasRemote()) return false;
     try{
-      const headers = { "Content-Type": "application/json" };
-      if (w.INVENTORY_AUTH) headers["Authorization"] = w.INVENTORY_AUTH;
-
-      let res = await fetch(w.INVENTORY_URL, { method:"PUT", headers, body: JSON.stringify(obj || {}) });
-      if (!res.ok){
-        res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
-      }
+      // Use text/plain to AVOID CORS preflight on Apps Script
+      const headers = { "Content-Type": "text/plain" };
+      const res = await fetch(w.INVENTORY_URL, { method:"POST", headers, body: JSON.stringify(obj || {}) });
       if (!res.ok) throw new Error("HTTP " + res.status);
       return true;
     }catch(e){
@@ -1018,6 +1029,7 @@
   }
 })();
 </script>
+<!-- ===== /Inventory Remote Sync ===== -->
 <!-- ===== /Inventory Remote Sync ===== -->
 </body>
 </html>
