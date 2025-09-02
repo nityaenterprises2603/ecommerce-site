@@ -767,7 +767,7 @@
 
     function openAdmin(){
       // simple passcode
-      const code = prompt('Enter admin passcode to edit inventory:');
+      const code = prompt('nitya@123:');
       if(code !== ADMIN_PASS){ alert('Wrong passcode.'); return; }
       // populate product list
       productPick.innerHTML = catalog.map(p=>`<option value="${p.id}">${p.name} — [${p.cat}]</option>`).join('');
@@ -870,8 +870,8 @@
   const w = window;
 
   // ---------- Config (override-ready) ----------
-  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "";         // ← put your JSON endpoint here
-  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "";       // ← optional: "Bearer <token>"
+  if (w.INVENTORY_URL === undefined) w.INVENTORY_URL = "https://script.google.com/macros/s/AKfycbxGtdkeNzJ5MXtzL03RLPVxGQVlu2c7Fr-X-5kbgSXXq544T23Tc3xF9Bx4TLNCNUan/exec";         // ← put your JSON endpoint here
+  if (w.INVENTORY_AUTH === undefined) w.INVENTORY_AUTH = "nitya@123 ";       // ← optional: "Bearer <token>"
   if (w.INV_KEY === undefined) w.INV_KEY = "nitya_inventory_v1";   // local cache key
 
   // Keep a fast in-memory cache
@@ -1017,6 +1017,7 @@
 <!-- ===== /Inventory Remote Sync ===== -->
 </body>
 </html>
+
 
 
 
