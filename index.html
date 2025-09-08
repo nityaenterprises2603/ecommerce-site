@@ -63,3 +63,341 @@ footer{margin-top:24px;padding:24px 0;border-top:1px solid #1f2937;color:var(--m
 <a href="#contact">Contact</a>
 </nav>
 </header>
+ <!-- ABOUT -->
+    <section id="about" class="card" style="margin-top:16px">
+      <div class="section-title">
+        <h2>About Us</h2>
+        <span class="pill">Single‑file demo • No backend</span>
+      </div>
+      <p class="muted">Welcome to <strong>Nitya Online Fashion</strong> — your shop for elegant imitation jewelry and traditional wear. This single‑file site includes an order bucket and a local inventory manager. Data is stored on the browser using <em>localStorage</em> (works offline, per device).</p>
+    </section>
+
+    <!-- KPI BAR -->
+    <section class="grid cols-3" style="margin-top:16px">
+      <div class="card"><div class="muted">Total SKUs</div><div class="kpi" id="kpiSkus">–</div></div>
+      <div class="card"><div class="muted">Items in Bucket</div><div class="kpi" id="kpiItems">–</div></div>
+      <div class="card"><div class="muted">Bucket Total (₹)</div><div class="kpi" id="kpiTotal">–</div></div>
+    </section>
+
+    <div class="two" style="margin-top:16px">
+      <!-- PRODUCTS -->
+      <section class="card">
+        <div class="section-title"><h2>Product Category: Imitation Jewelry</h2></div>
+        <div class="muted" style="margin-bottom:12px">Necklaces (Free Size), Rings (Free Size / 12–20), Bangles (Free Size / 2.2–2.10), Mangalsutra (Free Size), Earrings, Bracelets.</div>
+        <div id="jewelry" class="grid cols-3"></div>
+      </section>
+
+      <!-- BUCKET -->
+      <aside class="card" id="bucket">
+        <div class="section-title">
+          <h2>Order Bucket</h2>
+          <div class="toolbar">
+            <button class="btn ghost" onclick="exportBucket()">Export</button>
+            <label class="btn ghost" for="importBucket">Import</label>
+            <input id="importBucket" type="file" accept="application/json" style="display:none" onchange="importBucket(event)" />
+          </div>
+        </div>
+        <div id="bucketList" class="list"></div>
+        <div class="line" style="margin-top:10px"><strong>Total</strong><strong id="bucketTotal">₹0</strong></div>
+        <div class="toolbar" style="margin-top:12px">
+          <button class="btn warn" onclick="clearBucket()">Clear Bucket</button>
+          <button class="btn primary" onclick="shareOrder()">Share Order (Mail/WhatsApp)</button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- TRADITIONAL WEAR -->
+    <section id="wear" class="card" style="margin-top:16px">
+      <div class="section-title"><h2>Product Category: Traditional Wearing</h2></div>
+      <div class="grid cols-3" id="wearGrid"></div>
+    </section>
+
+    <!-- STOCK MANAGER -->
+    <section id="stock" class="card" style="margin-top:16px">
+      <div class="section-title">
+        <h2>Update Inventory</h2>
+        <span class="pill">LocalStorage • Per device</span>
+      </div>
+      <div class="muted" style="margin-bottom:12px">Adjust stock quantities below. Changes save automatically to your browser. Use <strong>Export</strong>/<strong>Import</strong> to move inventory to another machine.
+      </div>
+      <div id="stockList" class="list"></div>
+      <div class="toolbar" style="margin-top:12px">
+        <button class="btn ghost" onclick="exportInventory()">Export Inventory</button>
+        <label class="btn ghost" for="importInventory">Import Inventory</label>
+        <input id="importInventory" type="file" accept="application/json" style="display:none" onchange="importInventory(event)" />
+        <button class="btn" onclick="resetInventory()">Reset to Demo Data</button>
+      </div>
+    </section>
+
+    <!-- PAY VIA UPI -->
+    <section id="pay" class="card" style="margin-top:16px">
+      <div class="section-title"><h2>Pay through UPI</h2></div>
+      <div class="row">
+        <label>UPI ID (pa): <input id="upiId" placeholder="merchant@upi"/></label>
+        <label>Payee Name (pn): <input id="upiName" placeholder="Nitya Enterprises"/></label>
+        <label>Amount (₹): <input id="upiAmt" type="number" min="1" step="0.01"/></label>
+        <button class="btn primary" onclick="openUpiLink()">Open UPI Link</button>
+      </div>
+      <p class="muted" style="margin-top:8px">Auto‑fills amount from your current bucket when left empty.</p>
+      <div class="muted">Example generated link looks like: <code>upi://pay?pa=merchant@upi&pn=Nitya%20Enterprises&am=999&cu=INR</code></div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="card" style="margin-top:16px">
+      <div class="section-title"><h2>Contact Us</h2></div>
+      <p class="muted">Email: <a href="mailto:nityaenterprises2603@gmail.com">nityaenterprises2603@gmail.com</a> • WhatsApp: <a href="https://wa.me/918627901172" target="_blank" rel="noopener">+91 86279 01172</a></p>
+    </section>
+
+    <footer>
+      <div>Nitya Online Fashion © <span id="year"></span>. Built for demo — inventory/bucket stored locally on your device.</div>
+    </footer>
+  </div>
+
+  <script>
+    /*************************************
+     * Demo Catalog & Local State
+     *************************************/
+    const DEMO_INVENTORY = [
+      // Imitation Jewelry
+      { id:"NECK-001", name:"Oxidized Necklace Set", category:"Imitation Jewelry", sub:"Necklaces", sizes:["Free"], price:799, stock:{"Free":10} },
+      { id:"RING-001", name:"German Silver Ring", category:"Imitation Jewelry", sub:"Rings", sizes:["Free",...Array.from({length:9},(_,i)=>String(12+i))], price:199, stock:{"Free":20, "12":5, "13":5, "14":5, "15":5, "16":5, "17":5, "18":5, "19":5, "20":5} },
+      { id:"BANG-001", name:"Oxidized Bangles Pair", category:"Imitation Jewelry", sub:"Bangles", sizes:["Free","2.2","2.4","2.6","2.8","2.10"], price:349, stock:{"Free":12,"2.2":6,"2.4":6,"2.6":6,"2.8":6,"2.10":4} },
+      { id:"MANG-001", name:"Simple Mangalsutra", category:"Imitation Jewelry", sub:"Mangalsutra", sizes:["Free"], price:299, stock:{"Free":18} },
+      { id:"EAR-001", name:"Jhumka Earrings", category:"Imitation Jewelry", sub:"Earrings", sizes:["Free"], price:149, stock:{"Free":30} },
+      { id:"BRAC-001", name:"Charm Bracelet", category:"Imitation Jewelry", sub:"Bracelets", sizes:["Free"], price:179, stock:{"Free":22} },
+
+      // Traditional Wear
+      { id:"CHANI-001", name:"Navratri Chaniya Choli", category:"Traditional Wearing", sub:"Chaniya Choli", sizes:["S","M","L","XL"], price:2499, stock:{"S":3,"M":4,"L":4,"XL":2} },
+      { id:"KURTIS-001", name:"Cotton Kurti", category:"Traditional Wearing", sub:"Kurtis", sizes:["S","M","L","XL"], price:899, stock:{"S":10,"M":10,"L":8,"XL":6} },
+      { id:"KURTA-001", name:"Men's Festive Kurta", category:"Traditional Wearing", sub:"Kurtas", sizes:["M","L","XL"], price:1299, stock:{"M":6,"L":6,"XL":4} }
+    ];
+
+    const LS_KEYS = {
+      INV: "nitya_inventory_v1",
+      BUCKET: "nitya_bucket_v1"
+    };
+
+    const state = {
+      inventory: [], // array of items with stock map
+      bucket: []     // [{id,name,price,size,qty}]
+    };
+
+    function loadState(){
+      const inv = localStorage.getItem(LS_KEYS.INV);
+      const buc = localStorage.getItem(LS_KEYS.BUCKET);
+      state.inventory = inv ? JSON.parse(inv) : DEMO_INVENTORY;
+      state.bucket = buc ? JSON.parse(buc) : [];
+    }
+    function persist(){
+      localStorage.setItem(LS_KEYS.INV, JSON.stringify(state.inventory));
+      localStorage.setItem(LS_KEYS.BUCKET, JSON.stringify(state.bucket));
+      updateKpis();
+    }
+
+    /*************************************
+     * Rendering
+     *************************************/
+    function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
+
+    function renderProducts(){
+      const jWrap = document.getElementById('jewelry');
+      const wWrap = document.getElementById('wearGrid');
+      jWrap.innerHTML = ''; wWrap.innerHTML = '';
+
+      state.inventory.forEach(p => {
+        const sizeOptions = p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('');
+        const totalStock = Object.values(p.stock).reduce((a,b)=>a+Number(b||0),0);
+        const card = el(`
+          <div class="card">
+            <div class="muted">${p.category} • ${p.sub}</div>
+            <h3>${p.name}</h3>
+            <div class="row"><span class="badge">ID: ${p.id}</span><span class="badge">₹${p.price}</span><span class="badge">Stock: ${totalStock}</span></div>
+            <div class="row" style="margin-top:8px">
+              <label>Size <select id="size-${p.id}">${sizeOptions}</select></label>
+              <label>Qty <input id="qty-${p.id}" type="number" min="1" value="1" style="width:90px"></label>
+            </div>
+            <div class="toolbar" style="margin-top:8px">
+              <button class="btn" onclick="addToBucket('${p.id}')">Add</button>
+            </div>
+          </div>`);
+        if(p.category === 'Imitation Jewelry') jWrap.appendChild(card); else wWrap.appendChild(card);
+      });
+    }
+
+    function renderBucket(){
+      const list = document.getElementById('bucketList');
+      list.innerHTML = '';
+      let total = 0; let count = 0;
+      state.bucket.forEach((it,idx)=>{
+        const line = el(`<div class="line">
+          <div>
+            <div><strong>${it.name}</strong> <span class="muted">(${it.size})</span></div>
+            <div class="muted">₹${it.price} × ${it.qty}</div>
+          </div>
+          <div class="row">
+            <button class="btn ghost" onclick="changeQty(${idx},-1)">-</button>
+            <button class="btn ghost" onclick="changeQty(${idx},+1)">+</button>
+            <button class="btn warn" onclick="removeFromBucket(${idx})">Remove</button>
+          </div>
+        </div>`);
+        list.appendChild(line);
+        total += it.price * it.qty; count += it.qty;
+      });
+      document.getElementById('bucketTotal').textContent = `₹${total.toFixed(2)}`;
+      updateKpis(count,total);
+    }
+
+    function renderStock(){
+      const wrap = document.getElementById('stockList');
+      wrap.innerHTML='';
+      state.inventory.forEach((p,pIndex)=>{
+        const sizeRows = p.sizes.map(s=>{
+          const stk = Number(p.stock[s]||0);
+          return `<div class="row" style="justify-content:space-between">
+            <div><span class="badge">${s}</span></div>
+            <div class="row">
+              <input type="number" min="0" value="${stk}" style="width:120px" oninput="onStockEdit(${pIndex}, '${s}', this.value)" />
+            </div>
+          </div>`;
+        }).join('');
+        const card = el(`
+          <div class="card">
+            <div class="muted">${p.category} • ${p.sub}</div>
+            <h3>${p.name}</h3>
+            <div class="list">${sizeRows}</div>
+          </div>`);
+        wrap.appendChild(card);
+      });
+    }
+
+    function updateKpis(cntOverride,totalOverride){
+      const totalSkus = state.inventory.length;
+      const items = typeof cntOverride==='number' ? cntOverride : state.bucket.reduce((a,b)=>a+b.qty,0);
+      const total = typeof totalOverride==='number' ? totalOverride : state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
+      document.getElementById('kpiSkus').textContent = totalSkus;
+      document.getElementById('kpiItems').textContent = items;
+      document.getElementById('kpiTotal').textContent = `₹${total.toFixed(2)}`;
+    }
+
+    /*************************************
+     * Bucket Ops
+     *************************************/
+    function findProduct(id){ return state.inventory.find(p=>p.id===id); }
+
+    function addToBucket(id){
+      const p = findProduct(id); if(!p) return;
+      const size = document.getElementById(`size-${id}`).value;
+      const qty = Math.max(1, Number(document.getElementById(`qty-${id}`).value || 1));
+      const available = Number(p.stock[size]||0);
+      if(qty>available){ alert(`Only ${available} in stock for size ${size}`); return; }
+      // merge if same item+size exists
+      const idx = state.bucket.findIndex(b=>b.id===id && b.size===size);
+      if(idx>-1){ state.bucket[idx].qty += qty; }
+      else { state.bucket.push({ id:p.id, name:p.name, price:p.price, size, qty }); }
+      // reduce stock
+      p.stock[size] = available - qty;
+      persist();
+      renderBucket(); renderStock(); renderProducts();
+    }
+
+    function changeQty(idx,delta){
+      const it = state.bucket[idx]; if(!it) return;
+      const p = findProduct(it.id); const available = Number(p.stock[it.size]||0);
+      if(delta>0){ if(available<=0){ alert('No more stock'); return; } p.stock[it.size]=available-1; it.qty+=1; }
+      if(delta<0){ it.qty-=1; p.stock[it.size]=available+1; if(it.qty<=0){ state.bucket.splice(idx,1); } }
+      persist(); renderBucket(); renderStock(); renderProducts();
+    }
+
+    function removeFromBucket(idx){
+      const it = state.bucket[idx]; if(!it) return;
+      const p = findProduct(it.id);
+      p.stock[it.size] = Number(p.stock[it.size]||0) + it.qty; // return stock
+      state.bucket.splice(idx,1);
+      persist(); renderBucket(); renderStock(); renderProducts();
+    }
+
+    function clearBucket(){
+      if(!confirm('Clear all items from bucket?')) return;
+      // return all stock
+      state.bucket.forEach(it=>{
+        const p = findProduct(it.id); if(p){ p.stock[it.size] = Number(p.stock[it.size]||0) + it.qty; }
+      });
+      state.bucket = [];
+      persist(); renderBucket(); renderStock(); renderProducts();
+    }
+
+    /*************************************
+     * Stock Import/Export
+     *************************************/
+    function exportInventory(){ downloadJson('nitya_inventory.json', state.inventory); }
+    function importInventory(e){ readJsonFile(e,(data)=>{ state.inventory = data; persist(); renderAll(); }); }
+
+    function exportBucket(){ downloadJson('nitya_bucket.json', state.bucket); }
+    function importBucket(e){ readJsonFile(e,(data)=>{ state.bucket = data; persist(); renderAll(); }); }
+
+    function resetInventory(){ if(confirm('Reset inventory to demo data?')){ state.inventory = JSON.parse(JSON.stringify(DEMO_INVENTORY)); persist(); renderAll(); } }
+
+    function onStockEdit(pIndex,size,val){
+      const v = Math.max(0, Number(val||0));
+      state.inventory[pIndex].stock[size] = v;
+      persist(); renderProducts(); renderBucket();
+    }
+
+    /*************************************
+     * Share (Mail / WhatsApp)
+     *************************************/
+    function shareOrder(){
+      if(state.bucket.length===0){ alert('Bucket is empty'); return; }
+      const lines = state.bucket.map(it=>`• ${it.name} (${it.size}) × ${it.qty} = ₹${(it.qty*it.price).toFixed(2)}`);
+      const total = state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
+      const text = `Order Request – Nitya Online Fashion%0A%0A${lines.join('%0A')}%0A%0ATotal: ₹${total.toFixed(2)}%0A%0AName:%20%0APhone:%20%0AAddress:%20`;
+      const subject = 'Order Request – Nitya Online Fashion';
+      const body = decodeURIComponent(text).replace(/%0A/g,'\n');
+      // open choices
+      const w = window.open('', '_blank');
+      w.document.write(`<p style="font-family:system-ui">Choose an option:</p>
+        <p><a href="mailto:nityaenterprises2603@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}">Email the order</a></p>
+        <p><a href="https://wa.me/?text=${text}" target="_blank" rel="noopener">Share via WhatsApp</a></p>
+        <p><button onclick="window.close()">Close</button></p>`);
+    }
+
+    /*************************************
+     * UPI
+     *************************************/
+    function openUpiLink(){
+      const pa = document.getElementById('upiId').value.trim();
+      const pn = document.getElementById('upiName').value.trim() || 'Nitya Enterprises';
+      const bucketTotal = state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
+      const am = document.getElementById('upiAmt').value.trim() || bucketTotal.toFixed(2);
+      if(!pa){ alert('Enter UPI ID (pa)'); return; }
+      const url = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=INR`;
+      // Most browsers won’t allow navigating custom scheme from iframe; try window.location
+      window.location.href = url;
+    }
+
+    /*************************************
+     * Helpers
+     *************************************/
+    function downloadJson(filename, data){
+      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function readJsonFile(e, cb){
+      const file = e.target.files[0]; if(!file) return;
+      const fr = new FileReader();
+      fr.onload = () => { try{ const data = JSON.parse(fr.result); cb(data);} catch(err){ alert('Invalid JSON'); } };
+      fr.readAsText(file);
+    }
+
+    function renderAll(){ renderProducts(); renderBucket(); renderStock(); updateKpis(); }
+
+    // Bootstrap
+    document.getElementById('year').textContent = new Date().getFullYear();
+    loadState();
+    renderAll();
+  </script>
+</body>
+</html>
+
