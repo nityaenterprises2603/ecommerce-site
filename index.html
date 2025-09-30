@@ -2,402 +2,644 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Nitya Online Fashion</title>
-<!-- Favicon (optional) -->
-<link rel="icon" type="image/png" href="images/favicon.png" />
-<link rel="icon" href="images/logo.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nitya Enterprises — E-Commerce</title>
+  <meta name="description" content="Oxidized Jewellery & Traditional Clothing — Browse, select size, add to bucket, pay via UPI, and place your order on email & WhatsApp."/>
   <style>
-    :root { --bg:#0f172a; --card:#111827; --muted:#94a3b8; --text:#e5e7eb; --accent:#22c55e; --accent2:#60a5fa; }
+    :root{
+      --maroon:#6A0D25;       /* maroon wine */
+      --orange:#FF6600;       /* orange */
+      --bg:#fff8f3;           /* soft warm background */
+      --ink:#222;             /* text color */
+      --muted:#666;
+      --card:#ffffff;
+      --ring: rgba(0,0,0,.08);
+    }
     *{box-sizing:border-box}
-    body{margin:0;background:linear-gradient(180deg,#0b1220,#0f172a 20%,#0b1220);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
-    a{color:var(--accent2);text-decoration:none}
-    .container{max-width:1200px;margin:0 auto;padding:24px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
-    .brand{display:flex;align-items:center;gap:12px}
-    .logo{width:500px;height:500px;border-radius:12px;background:conic-gradient(from 210deg,var(--accent2),var(--accent));display:grid;place-items:center;color:#0b1220;font-weight:800}
-    nav{display:flex;flex-wrap:wrap;gap:10px}
-    nav a{padding:8px 12px;border:1px solid #243045;border-radius:12px;color:var(--muted)}
-    h1,h2,h3{margin:8px 0}
-    .grid{display:grid;gap:16px}
-    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
-    @media (max-width: 980px){.grid.cols-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media (max-width: 640px){.grid.cols-3{grid-template-columns:1fr}}
-    .card{background:rgba(17,24,39,.6);border:1px solid #1f2937;border-radius:16px;padding:16px;backdrop-filter: blur(6px);}
+    html{scroll-behavior:smooth}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    a{color:inherit}
+    header{position:sticky;top:0;z-index:50;background:var(--maroon);color:#fff;border-bottom:3px solid var(--orange)}
+    .wrap{max-width:1100px;margin:auto;padding:0 16px}
+    .nav{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
+    .brand{display:flex;gap:10px;align-items:center}
+    .brand .logo{width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--orange),#ffa366);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800}
+    .brand h1{font-size:1.05rem;margin:0;letter-spacing:.3px}
+    .menu{display:flex;flex-wrap:wrap;gap:10px}
+    .menu a{padding:8px 10px;border-radius:8px;color:#fff;text-decoration:none}
+    .menu a:hover{background:rgba(255,255,255,.12)}
+    .bucket-btn{display:inline-flex;gap:8px;align-items:center;background:var(--orange);color:#fff;padding:8px 12px;border-radius:999px;border:none;font-weight:700;cursor:pointer}
+    .count{background:#fff;color:var(--orange);font-weight:800;border-radius:999px;padding:2px 8px}
+
+    .hero{background:linear-gradient(180deg,rgba(106,13,37,.10),rgba(255,102,0,.08));padding:28px 0}
+    .hero h2{margin:6px 0;font-size:1.6rem}
+    .hero p{color:#2d2d2d;margin:6px 0 2px}
+    .tag{display:inline-block;background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;margin-top:8px}
+
+    .section{padding:28px 0}
+    .section h3{margin:0 0 14px;font-size:1.25rem;color:var(--maroon)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:14px;overflow:hidden;box-shadow:0 3px 10px rgba(0,0,0,.06);transition:.2s ease}
+    .card:hover{transform:translateY(-2px)}
+    .thumb{width:100%;height:280px;object-fit:cover;background:#f1f1f1;display:block}
+    .pad{padding:12px}
+    .title{font-weight:700;margin:0 0 4px}
+    .price{color:var(--muted);font-size:.95rem}
+
+    /* size buttons */
+    .sizes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+    .size-btn{border:1px solid var(--ring);background:#fff;padding:6px 10px;border-radius:999px;cursor:pointer;font-weight:600}
+    .size-btn[aria-pressed="true"]{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+    .size-hint{font-size:.85rem;color:var(--muted);margin-top:4px}
+
+    .btns{display:flex;gap:8px;margin-top:12px}
+    .btn{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;padding:8px 10px;border:1px solid var(--ring);background:#fff;cursor:pointer}
+    .btn.add{background:var(--orange);border-color:var(--orange);color:#fff;font-weight:700}
+    .btn.remove{color:var(--maroon);font-weight:700}
+    .btn.bucket{background:var(--maroon);color:#fff}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+
+    /* Bucket panel */
+    .drawer{position:fixed;right:0;top:0;height:100dvh;width:min(420px,95vw);background:#fff;border-left:3px solid var(--orange);box-shadow:-8px 0 20px rgba(0,0,0,.12);transform:translateX(105%);transition:.28s ease;z-index:60;display:flex;flex-direction:column}
+    .drawer.open{transform:translateX(0)}
+    .drawer header{background:#fff;color:var(--ink);border-bottom:1px solid var(--ring)}
+    .drawer h4{margin:0;font-size:1.1rem}
+    .drawer .body{padding:12px;overflow:auto;flex:1}
+    .cart-item{display:grid;grid-template-columns:56px 1fr auto;gap:10px;align-items:center;border-bottom:1px dashed var(--ring);padding:10px 0}
+    .cart-item img{width:56px;height:42px;object-fit:cover;border-radius:6px}
+    .small{color:var(--muted);font-size:.9rem}
+    .row{display:flex;justify-content:space-between;gap:10px;margin:6px 0}
+    .total{font-weight:800;font-size:1.05rem}
+
+    .order{background:#fff;border:1px solid var(--ring);border-radius:14px;padding:14px}
+    form label{display:block;margin-top:12px;font-weight:600}
+    form input, form textarea, form select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--ring);background:#fff}
+    form textarea{min-height:120px}
+    .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .cta{background:var(--orange);color:#fff;border:none;padding:10px 14px;border-radius:999px;font-weight:800;cursor:pointer}
+    .ghost{background:#fff;color:var(--maroon);border:2px solid var(--maroon)}
+
+    .upi{display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;margin-top:10px}
+    .upi .qr{width:220px;height:220px;border-radius:8px;border:1px solid var(--ring);overflow:hidden;display:flex;align-items:center;justify-content:center;background:#fff}
     .muted{color:var(--muted)}
-    .btn{appearance:none;border:none;border-radius:12px;padding:10px 14px;background:#1f2937;color:var(--text);cursor:pointer}
-    .btn.primary{background:linear-gradient(135deg,var(--accent2),var(--accent));color:#0b1220;font-weight:700}
-    .btn.ghost{background:transparent;border:1px solid #303a4d}
-    .btn.warn{background:#ef4444}
-    .toolbar{display:flex;flex-wrap:wrap;gap:8px}
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    input,select,textarea{background:#0b1220;border:1px solid #243045;color:var(--text);border-radius:10px;padding:8px 10px}
-    .pill{display:inline-flex;align-items:center;gap:8px;border:1px dashed #334155;border-radius:999px;padding:6px 10px;color:var(--muted)}
-    .kpi{font-size:22px;font-weight:800}
-    .section-title{display:flex;justify-content:space-between;align-items:center}
-    .two{display:grid;grid-template-columns:2fr 1fr;gap:16px}
-    @media (max-width: 980px){.two{grid-template-columns:1fr}}
-    .list{display:grid;gap:8px}
-    .line{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border:1px solid #1f2937;border-radius:10px}
-    .badge{background:#0b1220;border:1px solid #334155;padding:2px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
-    footer{margin-top:24px;padding:24px 0;border-top:1px solid #1f2937;color:var(--muted)}
+
+    footer{background:var(--maroon);color:#fff;margin-top:28px}
+    footer .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:14px 16px}
+    code.kbd{background:#fff2e6;border:1px solid var(--orange);padding:2px 6px;border-radius:6px}
+
+    /* badges for group headings */
+    .badge{display:inline-block;background:var(--maroon);color:#fff;padding:6px 12px;border-radius:999px;margin-bottom:10px;font-weight:700}
+    .subnav{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+    .subnav a{background:#fff;border:1px solid var(--ring);padding:6px 10px;border-radius:999px;text-decoration:none}
+    .subnav a:hover{border-color:var(--orange)}
+
+    @media (max-width:720px){
+      .upi{grid-template-columns:1fr}
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
+  <header>
+    <div class="wrap nav">
       <div class="brand">
-       <div class="logo"><img src="assets/logo/LOGO_2.png" alt="Nitya Online Fashion Logo" style="width:40px;height:40px;border-radius:12px;object-fit:cover;display:block" onerror="this.outerHTML='N'" /></div>
-        <div>
-          <h1 style="margin:0">Nitya Online Fashion</h1>
-          <div class="muted">Imitation Jewelry & Traditional Wear</div>
-        </div>
+        <div class="logo" aria-hidden="true">NE</div>
+        <h1>Oxidized Jewellery & Traditional Clothing</h1>
       </div>
-      <nav>
-        <a href="#about">About</a>
-        <a href="#jewelry">Imitation Jewelry</a>
-        <a href="#wear">Traditional Wearing</a>
-        <a href="#bucket">Order Bucket</a>
-        <a href="#stock">Update Inventory</a>
-        <a href="#pay">Pay via UPI</a>
+      <nav class="menu" aria-label="Main Navigation">
+        <a href="#jewellery">Jewellery</a>
+        <a href="#traditional">Traditional Clothing</a>
+        <a href="#order">Order</a>
         <a href="#contact">Contact</a>
+        <a href="#Exchange Policy">Exchange Policy</a>
+        <button class="bucket-btn" id="openBucket" title="Open Bucket" aria-haspopup="dialog">
+          🧺 Bucket <span class="count" id="bucketCount">0</span>
+        </button>
       </nav>
-    </header>
+    </div>
+  </header>
 
-    <!-- ABOUT -->
-    <section id="about" class="card" style="margin-top:16px">
-      <div class="section-title">
-        <h2>About Us</h2>
-        <span class="pill">Single‑file demo • No backend</span>
-      </div>
-      <p class="muted">Welcome to <strong>Nitya Online Fashion</strong> — your shop for elegant imitation jewelry and traditional wear. This single‑file site includes an order bucket and a local inventory manager. Data is stored on the browser using <em>localStorage</em> (works offline, per device).</p>
-    </section>
+  <section class="hero">
+    <div class="wrap">
+      <h2>Shop handcrafted Oxidized Jewellery & Traditional Wear</h2>
+      <p>Add items to your <strong>Bucket</strong>, pick <strong>Size</strong> where required, pay via <strong>UPI</strong>, then send your order by <strong>Email</strong> & <strong>WhatsApp</strong>.</p>
+    </div>
+  </section>
 
-    <!-- KPI BAR -->
-    <section class="grid cols-3" style="margin-top:16px">
-      <div class="card"><div class="muted">Total SKUs</div><div class="kpi" id="kpiSkus">–</div></div>
-      <div class="card"><div class="muted">Items in Bucket</div><div class="kpi" id="kpiItems">–</div></div>
-      <div class="card"><div class="muted">Bucket Total (₹)</div><div class="kpi" id="kpiTotal">–</div></div>
-    </section>
-
-    <div class="two" style="margin-top:16px">
-      <!-- PRODUCTS -->
-      <section class="card">
-        <div class="section-title"><h2>Product Category: Imitation Jewelry</h2></div>
-        <div class="muted" style="margin-bottom:12px">Necklaces (Free Size), Rings (Free Size / 12–20), Bangles (Free Size / 2.2–2.10), Mangalsutra (Free Size), Earrings, Bracelets.</div>
-        <div id="jewelry" class="grid cols-3"></div>
-      </section>
-
-      <!-- BUCKET -->
-      <aside class="card" id="bucket">
-        <div class="section-title">
-          <h2>Order Bucket</h2>
-          <div class="toolbar">
-            <button class="btn ghost" onclick="exportBucket()">Export</button>
-            <label class="btn ghost" for="importBucket">Import</label>
-            <input id="importBucket" type="file" accept="application/json" style="display:none" onchange="importBucket(event)" />
-          </div>
-        </div>
-        <div id="bucketList" class="list"></div>
-        <div class="line" style="margin-top:10px"><strong>Total</strong><strong id="bucketTotal">₹0</strong></div>
-        <div class="toolbar" style="margin-top:12px">
-          <button class="btn warn" onclick="clearBucket()">Clear Bucket</button>
-          <button class="btn primary" onclick="shareOrder()">Share Order (Mail/WhatsApp)</button>
-        </div>
-      </aside>
+  <!-- Oxidized Jewellery -->
+  <section id="jewellery" class="section wrap">
+    <span class="badge">Main Category: Jewellery</span>
+    <div class="subnav" aria-label="Jewellery subcategories">
+      <a href="#Earrings">Earrings</a>
+      <a href="#Necklaces">Necklaces</a>
+      <a href="#Rings">Rings</a>
+      <a href="#Anklets">Anklets</a>
+      <a href="#Bangles">Bangles</a>
+      <a href="#Bracelets">Bracelets</a>
+      
     </div>
 
-    <!-- TRADITIONAL WEAR -->
-    <section id="wear" class="card" style="margin-top:16px">
-      <div class="section-title"><h2>Product Category: Traditional Wearing</h2></div>
-      <div class="grid cols-3" id="wearGrid"></div>
-    </section>
+    <div id="Earrings"><h3>Earrings</h3><div class="grid" data-grid="Earrings"></div></div>
+    <div id="Necklaces"><h3>Necklaces</h3><div class="grid" data-grid="Necklaces"></div></div>
+    <div id="Rings"><h3>Rings</h3><div class="grid" data-grid="Rings"></div></div>
+    <div id="Anklets"><h3>Anklets</h3><div class="grid" data-grid="Anklets"></div></div>
+    <div id="Bangles"><h3>Bangles</h3><div class="grid" data-grid="Bangles"></div></div>
+    <div id="Bracelets"><h3>Bracelets</h3><div class="grid" data-grid="Bracelets"></div></div>
+   
+  </section>
 
-    <!-- STOCK MANAGER -->
-    <section id="stock" class="card" style="margin-top:16px">
-      <div class="section-title">
-        <h2>Update Inventory</h2>
-        <span class="pill">LocalStorage • Per device</span>
-      </div>
-      <div class="muted" style="margin-bottom:12px">Adjust stock quantities below. Changes save automatically to your browser. Use <strong>Export</strong>/<strong>Import</strong> to move inventory to another machine.
-      </div>
-      <div id="stockList" class="list"></div>
-      <div class="toolbar" style="margin-top:12px">
-        <button class="btn ghost" onclick="exportInventory()">Export Inventory</button>
-        <label class="btn ghost" for="importInventory">Import Inventory</label>
-        <input id="importInventory" type="file" accept="application/json" style="display:none" onchange="importInventory(event)" />
-        <button class="btn" onclick="resetInventory()">Reset to Demo Data</button>
-      </div>
-    </section>
+  <!-- Traditional Clothing -->
+  <section id="traditional" class="section wrap">
+    <span class="badge">Main Category: Traditional Clothing</span>
+    <div class="subnav" aria-label="Traditional subcategories">
+      <a href="#ChaniyaCholi">Chaniya Choli</a>
+      <a href="#Kurtis">Kurtis</a>
+      <a href="#Kurta">Kurta</a>
+    </div>
+    <div id="ChaniyaCholi"><h3>Chaniya Choli</h3><div class="grid" data-grid="Chaniya Choli"></div></div>
+    <div id="Kurtis"><h3>Kurtis</h3><div class="grid" data-grid="Kurtis"></div></div>
+    <div id="Kurta"><h3>Kurta</h3><div class="grid" data-grid="Kurta"></div></div>
+  </section>
 
-    <!-- PAY VIA UPI -->
-    <section id="pay" class="card" style="margin-top:16px">
-      <div class="section-title"><h2>Pay through UPI</h2></div>
-      <div class="row">
-        <label>UPI ID (pa): <input id="upiId" placeholder="merchant@upi"/></label>
-        <label>Payee Name (pn): <input id="upiName" placeholder="Nitya Enterprises"/></label>
-        <label>Amount (₹): <input id="upiAmt" type="number" min="1" step="0.01"/></label>
-        <button class="btn primary" onclick="openUpiLink()">Open UPI Link</button>
+  <!-- Order & Payment -->
+  <section id="order" class="section wrap">
+    <h3>Order & Payment</h3>
+    <div class="order">
+      <p class="muted">Fill your details, review your bucket, then <strong>submit by Email</strong> and/or <strong>send via WhatsApp</strong>. Pay securely using the UPI options below.</p>
+
+      <div class="row"><span>Grand Total:</span> <span class="total" id="grandTotal">₹0</span></div>
+
+      <div class="upi" aria-label="UPI payment options">
+        <div>
+          <label>UPI ID</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="upiId" value="7990639743@ybl" readonly />
+            <button class="btn" id="copyUpi">Copy</button>
+          </div>
+          <div class="actions">
+            <a id="upiDeepLink" class="cta" href="#" target="_blank" rel="nofollow noopener">Pay via UPI App</a>
+            <button class="btn ghost" id="refreshQR" type="button">Refresh QR for Current Total</button>
+          </div>
+          <p class="muted" style="margin:6px 0 0"> Deep link & QR use the amount in your bucket (updates live).</p>
+        </div>
+        <div class="qr" id="qrBox" aria-label="UPI QR Code">
+          <!-- QR image injected by JS -->
+          <span class="muted" id="qrHint">QR</span>
+        </div>
+      </div> <!-- /upi -->
+
+      <form id="orderForm" action="https://formsubmit.co/salesnityaenterprises@gmail.com" method="POST" novalidate>
+        <!-- FormSubmit helpers -->
+        <input type="hidden" name="_subject" value="New Order — Nitya Enterprises"/>
+        <input type="hidden" name="_captcha" value="false"/>
+        <input type="hidden" name="_template" value="table"/>
+        <input type="hidden" name="order_details" id="order_details"/>
+        <input type="hidden" name="order_total" id="order_total"/>
+
+        <label for="custName">Customer Name</label>
+        <input id="custName" name="customer_name" placeholder="Your full name" required />
+
+        <label for="mobile">Customer Mobile No (10 digits)</label>
+        <input id="mobile" name="customer_mobile" inputmode="numeric" pattern="[0-9]{10}" placeholder="e.g., 9510683160" required />
+
+        <label for="altContact">Contact No (Alternate)</label>
+        <input id="altContact" name="alternate_contact" inputmode="numeric" pattern="[0-9]{10}" placeholder="Optional" />
+
+        <label for="addr">Address (Building No, Landmark, Area, City, State, Pincode)</label>
+        <textarea id="addr" name="address" placeholder="Building No, Landmark, Area, City, State, Pincode" required></textarea>
+
+        <label for="notes">Any Notes (Size/Color preferences, etc.)</label>
+        <textarea id="notes" name="notes" placeholder="Optional"></textarea>
+
+        <label for="summary">Order Summary (auto-filled)</label>
+        <textarea id="summary" readonly></textarea>
+
+        <div class="actions">
+          <button type="submit" class="cta">Submit Order by Email</button>
+          <button type="button" class="btn" id="sendWhatsApp">Send Order via WhatsApp</button>
+          <button type="button" class="btn ghost" id="clearBucket">Clear Bucket</button>
+        </div>
+        <p class="muted">Orders go to <strong>salesnityaenterprises@gmail.com</strong> and can also be sent to WhatsApp <strong>+91 9510683160</strong>.</p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="section wrap">
+    <h3>Contact Us</h3>
+    <p>Email: <a href="mailto:salesnityaenterprises@gmail.com">salesnityaenterprises@gmail.com</a> &nbsp; | &nbsp; Mobile: <a href="tel:+919510683160">+91 9510683160</a></p>
+  </section>
+<!-- Exchange Policy -->
+  <section id="Exchange Policy" class="section wrap">
+    <h3> Exchange Policy</h3>
+    <ul>
+      <li><strong>How to request:</strong> Share your order details along with a <strong>clear video recorded while unpacking the product</strong> via the <a href="#contact">Contact Us</a> details, or WhatsApp us at <strong>+91 95106 83160</strong>.</li>
+      <li>Mention the reason for exchange (size issue, wrong item, damaged item, etc.).</li>
+      
+    </ul>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div>© <span id="yr"></span> Nitya Enterprises • Ahmedabad • All India shipping</div>
+    </div>
+  </footer>
+
+  <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <header class="wrap" style="padding:12px 16px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <h4 id="drawerTitle">Your Bucket</h4>
+        <button class="btn" id="closeBucket">Close ✕</button>
       </div>
-      <p class="muted" style="margin-top:8px">Auto‑fills amount from your current bucket when left empty.</p>
-      <div class="muted">Example generated link looks like: <code>upi://pay?pa=merchant@upi&pn=Nitya%20Enterprises&am=999&cu=INR</code></div>
-    </section>
-
-    <!-- CONTACT -->
-    <section id="contact" class="card" style="margin-top:16px">
-      <div class="section-title"><h2>Contact Us</h2></div>
-      <p class="muted">Email: <a href="mailto:nityaenterprises2603@gmail.com">nityaenterprises2603@gmail.com</a> • WhatsApp: <a href="https://wa.me/918627901172" target="_blank" rel="noopener">+91 86279 01172</a></p>
-    </section>
-
-    <footer>
-      <div>Nitya Online Fashion © <span id="year"></span>. Built for demo — inventory/bucket stored locally on your device.</div>
-    </footer>
+    </header>
+    <div class="body" id="cartList"></div>
+    <div class="pad" style="border-top:1px solid var(--ring)">
+      <div class="row"><span>Items:</span><span id="bucketItems">0</span></div>
+      <div class="row total"><span>Total:</span><span id="bucketTotal">₹0</span></div>
+      <div class="actions">
+        <a class="btn bucket" href="#order" id="goOrder">Proceed to Order</a>
+        <button class="btn" id="emptyCart">Empty</button>
+      </div>
+    </div>
   </div>
 
   <script>
-    /*************************************
-     * Demo Catalog & Local State
-     *************************************/
-    const DEMO_INVENTORY = [
-      // Imitation Jewelry
-      { id:"NECK-001", name:"Oxidized Necklace Set", category:"Imitation Jewelry", sub:"Necklaces", sizes:["Free"], price:799, stock:{"Free":10} },
-      { id:"RING-001", name:"German Silver Ring", category:"Imitation Jewelry", sub:"Rings", sizes:["Free",...Array.from({length:9},(_,i)=>String(12+i))], price:199, stock:{"Free":20, "12":5, "13":5, "14":5, "15":5, "16":5, "17":5, "18":5, "19":5, "20":5} },
-      { id:"BANG-001", name:"Oxidized Bangles Pair", category:"Imitation Jewelry", sub:"Bangles", sizes:["Free","2.2","2.4","2.6","2.8","2.10"], price:349, stock:{"Free":12,"2.2":6,"2.4":6,"2.6":6,"2.8":6,"2.10":4} },
-      { id:"MANG-001", name:"Simple Mangalsutra", category:"Imitation Jewelry", sub:"Mangalsutra", sizes:["Free"], price:299, stock:{"Free":18} },
-      { id:"EAR-001", name:"Jhumka Earrings", category:"Imitation Jewelry", sub:"Earrings", sizes:["Free"], price:149, stock:{"Free":30} },
-      { id:"BRAC-001", name:"Charm Bracelet", category:"Imitation Jewelry", sub:"Bracelets", sizes:["Free"], price:179, stock:{"Free":22} },
+    /* ==============================
+       QUICK SETUP
+       ============================== */
+    const SELLER_WHATSAPP = "+919510683160"; // WhatsApp in international format
+    const UPI_ID = "7990639743@ybl";         // Your VPA
+    const PAYEE_NAME = "Nitya Enterprises";  // Appears in UPI apps
+    // Global: size selection disabled (kept as in your file)
+    const SIZE_BAR_DISABLED = true;
+    const FREE_SIZE_LABEL = "Free Size";
 
-      // Traditional Wear
-      { id:"CHANI-001", name:"Navratri Chaniya Choli", category:"Traditional Wearing", sub:"Chaniya Choli", sizes:["S","M","L","XL"], price:2499, stock:{"S":3,"M":4,"L":4,"XL":2} },
-      { id:"KURTIS-001", name:"Cotton Kurti", category:"Traditional Wearing", sub:"Kurtis", sizes:["S","M","L","XL"], price:899, stock:{"S":10,"M":10,"L":8,"XL":6} },
-      { id:"KURTA-001", name:"Men's Festive Kurta", category:"Traditional Wearing", sub:"Kurtas", sizes:["M","L","XL"], price:1299, stock:{"M":6,"L":6,"XL":4} }
+    /* ===== Catalog with size options where applicable ===== */
+    const catalog = [
+      // Jewellery
+      {id:"ear-01", name:"German Silver Premium Quality Earings -a ", price:400, cat:"Earrings", img:"assets/earrings images/E-1.jpeg "},
+      {id:"ear-02", name:"German Silver Premium Quality Earings -b ", price:420, cat:"Earrings", img:"assets/earrings images/E-2.jpeg "},
+      {id:"ear-03", name:"German Silver Premium Quality Earings -c ", price:420, cat:"Earrings", img:"assets/earrings images/E-3.jpeg "},
+      {id:"ear-04", name:"German Silver Premium Quality Earings -d ", price:600, cat:"Earrings", img:"assets/earrings images/E-4.jpeg "},
+      {id:"ear-05", name:"German Silver Premium Quality Earings -e ", price:420, cat:"Earrings", img:"assets/earrings images/E-5.jpeg "},
+      {id:"ear-06", name:"Oxides Fancy Earcup Earrings -a  ", price:340, cat:"Earrings", img:"assets/earrings images/E-6.jpeg "},
+      {id:"ear-07", name:"Oxides Fancy Earcup Earrings-b  ", price:340, cat:"Earrings", img:"assets/earrings images/E-7.jpeg "},
+      {id:"ear-08", name:"Oxides Fancy Earcup Earrings-c  ", price:340, cat:"Earrings", img:"assets/earrings images/E-8.jpeg "},
+      {id:"ear-09", name:"Oxides Fancy Earcup Earrings-d  ", price:340, cat:"Earrings", img:"assets/earrings images/E-9.jpeg "},
+      {id:"ear-10", name:"Oxides Fancy Earcup Earrings-e  ", price:340, cat:"Earrings", img:"assets/earrings images/E-10.jpeg "},
+
+
+
+      // Necklaces
+      {id:"neck-01", name:"German Silver Premium Quality Necklace-a", price:2080, cat:"Necklaces", img:"assets/necklaces images/N-1.jpeg"},
+      {id:"neck-02", name:"German Silver Premium Quality Necklace-b", price:1950, cat:"Necklaces", img:" assets/necklaces images/N-2.jpeg "},
+      {id:"neck-03", name:"German Silver Premium Quality Necklace-c ", price:2210, cat:"Necklaces", img:" assets/necklaces images/N-3.jpeg "},
+      {id:"neck-04", name:"Mehandi Polish brass premium Quality hasdi Necklace-a ", price:2700, cat:"Necklaces",img:" assets/necklaces images/N-4.jpeg "},
+      {id:"neck-05", name:"German Silver Premium Quality Necklace-d ", price:1700, cat:"Necklaces", img:" assets/necklaces images/N-5.jpeg "},
+      {id:"neck-06", name:"Mehandi Polish brass premium Quality Necklace -b", price:2860, cat:"Necklaces", img:"assets/necklaces images/N-6.jpeg  "},
+      {id:"neck-07", name:"German Silver Premium Quality Necklace-e  ", price:2499, cat:"Necklaces", img:" assets/necklaces images/N-7.jpeg "},
+      {id:"neck-08", name:"Afgani Choker Necklace-a ", price:700, cat:"Necklaces", img:" assets/necklaces images/N-8.jpeg "},
+      {id:"neck-09", name:"German Silver Premium Quality Necklace-f ", price:3770, cat:"Necklaces", img:" assets/necklaces images/N-9.jpeg "},
+      {id:"neck-10", name:"German Silver Premium Quality Necklace-g ", price:1950, cat:"Necklaces", img:"assets/necklaces images/N-10.jpeg "},
+      {id:"neck-11", name:"German Silver Premium Quality Necklace-h ", price:2860, cat:"Necklaces", img:" assets/necklaces images/N-11.jpeg"},
+      {id:"neck-12", name:"Afgani Choker Necklace-b ", price:700, cat:"Necklaces", img:"assets/necklaces images/N-12.jpeg "},
+      {id:"neck-13", name:"German Silver Premium Quality Necklace-i ", price:2160, cat:"Necklaces", img:"assets/necklaces images/N-13.jpeg "},
+      {id:"neck-14", name:"German Silver Premium Quality Necklace-j ", price:1550, cat:"Necklaces", img:"assets/necklaces images/N-14.jpeg "},
+      {id:"neck-15", name:"German Silver Premium Quality Necklace-k ",price:3120, cat:"Necklaces", img:"assets/necklaces images/N-15.jpeg "},
+      {id:"neck-16", name:"German Silver Premium Quality Necklace-L ", price:2270, cat:"Necklaces", img:"assets/necklaces images/N-16.jpeg"},
+      {id:"neck-17", name:"Afgani Choker Necklace-c ", price:700, cat:"Necklaces", img:"assets/necklaces images/N-17.jpeg "},
+      {id:"neck-18", name:"Afgani Long Necklace-d ", price: 910  , cat:"Necklaces", img:"assets/necklaces images/N-18.jpeg "},
+      {id:"neck-19", name:" Afgani Necklace-e ", price: 560  , cat:"Necklaces", img:"assets/necklaces images/N-19.jpeg "},
+      {id:"neck-20", name:" Ghoongru Choker Necklace-a ", price: 340  , cat:"Necklaces", img:"assets/necklaces images/N-20.jpeg "},
+      {id:"neck-21", name:" Ghoongru Choker Necklace-b  ", price: 340  , cat:"Necklaces", img:"assets/necklaces images/N-21.jpeg "},
+      {id:"neck-22", name:" Ghoongru Choker Necklace-c ", price:  340 , cat:"Necklaces", img:"assets/necklaces images/N-22.jpeg "},
+      {id:"neck-23", name:" Ghoongru Choker Necklace-d  ", price: 450  , cat:"Necklaces", img:"assets/necklaces images/N-23.jpeg "},
+      {id:"neck-24", name:" German Silver Premium Quality chain Pandal butti-a  ", price: 460 , cat:"Necklaces", img:"assets/necklaces images/N-24.jpeg "},
+      {id:"neck-25", name:" German Silver Premium Quality chain Pandal butti-b  ", price: 240 , cat:"Necklaces", img:"assets/necklaces images/N-25.jpeg "},
+      {id:"neck-26", name:" German Silver Premium Quality chain Pandal butti-c  ", price: 600 , cat:"Necklaces", img:"assets/necklaces images/N-26.jpeg "},
+      {id:"neck-27", name:" German Silver Premium Quality chain Pandal butti-d  ", price: 490 , cat:"Necklaces", img:"assets/necklaces images/N-27.jpeg "},
+      {id:"neck-28", name:" German Silver Premium Quality chain Pandal butti-e  ", price: 240 , cat:"Necklaces", img:"assets/necklaces images/N-28.jpeg "},
+      {id:"neck-29", name:" Ghoongru Choker Necklace-e  ", price: 340 , cat:"Necklaces", img:"assets/necklaces images/N-29.jpeg "},
+      {id:"neck-30", name:" German Silver Premium Quality chain Pandal butti-f  ", price: 420 , cat:"Necklaces", img:"assets/necklaces images/N-30.jpeg "},
+      {id:"neck-31", name:" German Silver Premium Quality chain Pandal butti-g  ", price: 560 , cat:"Necklaces", img:"assets/necklaces images/N-31.jpeg "},
+      {id:"neck-32", name:" German Silver Premium Quality chain Pandal butti-h ", price:  890 , cat:"Necklaces", img:"assets/necklaces images/N-32.jpeg "},
+      {id:"neck-33", name:" Oxides Choker Necklace-a ", price: 650 , cat:"Necklaces", img:"assets/necklaces images/N-33.jpeg "},
+      {id:"neck-34", name:" German Silver premium quality long necklace -a  ", price: 1610  , cat:"Necklaces", img:"assets/necklaces images/N-34.jpeg "},
+      {id:"neck-35", name:" Oxides Long Necklace -a  ", price: 220 , cat:"Necklaces", img:"assets/necklaces images/N-35.jpeg "},
+      {id:"neck-36", name:" Oxides Choker hasdi  Necklace-a ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-36.jpeg "},
+      {id:"neck-37", name:" Oxides Choker hasdi  Necklace-b  ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-37.jpeg "},
+      {id:"neck-38", name:" Oxides Long Necklace -b ", price:450 , cat:"Necklaces", img:"assets/necklaces images/N-38.jpeg "},
+      {id:"neck-39", name:" Oxides Choker hasdi  Necklace-c ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-39.jpeg "},
+      {id:"neck-40", name:" Handmade Navratri Special Long Necklace-a ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-40.jpeg "},
+      {id:"neck-41", name:" Handmade Navratri Special Long Necklace-b  ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-41.jpeg "},
+      {id:"neck-42", name:" Oxides Choker hasdi  Necklace-d ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-42.jpeg "},
+      {id:"neck-43", name:" Handmade Navratri Special Long Necklace-c  ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-43.jpeg "},
+      {id:"neck-44", name:" Handmade Navratri Special Long Necklace-d ", price: 450 , cat:"Necklaces", img:"assets/necklaces images/N-44.jpeg "},
+      {id:"neck-45", name:" Oxides Hasdi Necklace-a ", price: 200 , cat:"Necklaces", img:"assets/necklaces images/N-45.jpeg "},
+      {id:"neck-46", name:" Handmade Navratri Special Long Necklace-e ", price: 140 , cat:"Necklaces", img:"assets/necklaces images/N-46.jpeg "},
+
+
+       // RINGS — with size buttons
+      {id:"ring-01", name:"German Silver Premium Quality Free Size ring-a ", price:390, cat:"Rings", img:"assets/Ring 2_1_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-02", name:"German Silver Premium Quality Free Size ring-b", price:200, cat:"Rings", img:"assets/Ring 3_2_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-03", name:"German Silver Premium Quality Free Size ring-c", price:200, cat:"Rings", img:"assets/Ring 4_3_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-04", name:"German Silver Premium Quality Free Size ring-d", price:200, cat:"Rings", img:"assets/Ring 5_4_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-05", name:"German Silver Premium Quality Free Size ring-e", price:200, cat:"Rings", img:"assets/Ring 6_5_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+      {id:"ring-06", name:"German Silver Premium Quality Free Size ring-f", price:650, cat:"Rings", img:"assets/Ring1_6_11zon.jpeg", sizes:["Free Size","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"]},
+
+      {id:"ank-01", name:"Silver Anklet", price:699, cat:"Anklets", img:"https://via.placeholder.com/800x600?text=Anklet+1"},
+
+      {id:"ban-01", name:"Oxides Fancy Bacchu Kada -a (pair)  ", price:450 , cat:"Bangles", img:"assets/images/bangles/B-1.jpeg   "},
+      {id:"ban-02", name:"Oxides Fancy Bacchu Kada -b (pair)  ", price:450 , cat:"Bangles", img:"assets/images/bangles/B-2.jpeg   "},
+      {id:"ban-03", name:"Oxides Fancy Bacchu Kada -c (pair)  ", price: 450 , cat:"Bangles", img:" assets/images/bangles/B-3.jpeg  "},
+      {id:"ban-04", name:"Oxides Fancy Bacchu Kada -d (pair)  ", price: 450 , cat:"Bangles", img:" assets/images/bangles/B-4.jpeg  "},
+      {id:"ban-05", name:" Oxides Fancy Bacchu Kada -e (pair)  ", price: 450 , cat:"Bangles", img:"assets/images/bangles/B-5.jpeg   "},
+      {id:"ban-06", name:" Oxides  Handmade Fancy free size Kada -a (pair)  ", price: 520   , cat:"Bangles", img:" assets/images/bangles/B-6.jpeg  "},
+      {id:"ban-07", name:" Oxides Fancy adjusted kada  -a (single) ", price: 240 , cat:"Bangles", img:"assets/images/bangles/B-7.jpeg  "},
+      {id:"ban-08", name:" Oxides  Handmade Fancy free size Kada -b (pair) ", price: 520 , cat:"Bangles", img:" assets/images/bangles/B-8.jpeg  "},
+      {id:"ban-09", name:"Thread Work Handmade Bangles Colour Meroon -a (size :24.26.28)  ", price: 740   , cat:"Bangles", img:"assets/images/bangles/B-9.jpeg   "},
+      {id:"ban-10", name:"Thread Work Handmade Bangles Colour multi colour-b (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-10.jpeg  "},
+      {id:"ban-11", name:" Thread Work Handmade Bangles Colour Cream-c (Size : 24.26.28) ", price:740   , cat:"Bangles", img:" assets/images/bangles/B-11.jpeg  "},
+      {id:"ban-12", name:" Thread Work Handmade Bangles Colour Yellow-d (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-12.jpeg  "},
+      {id:"ban-13", name:" Thread Work Handmade Bangles Colour Black-e (Size : 24.26.28) ", price: 740  , cat:"Bangles", img:" assets/images/bangles/B-13.jpeg  "},
+      {id:"ban-14", name:" Thread Work Handmade Bangles Colour Morepich-f (Size : 24.26.28) ", price: 740   , cat:"Bangles", img:" assets/images/bangles/B-14.jpeg  "},
+      {id:"ban-15", name:" Thread Work Handmade Bangles Colour Yellow-dd(Size : 24.26.28) ", price: 740  , cat:"Bangles", img:" assets/images/bangles/B-15.jpeg  "},
+      {id:"ban-16", name:" Oxides Fancy Bacchu Kada -f (pair)  ", price: 340   , cat:"Bangles", img:" assets/images/bangles/B-16.jpeg  "},
+      {id:"ban-17", name:" Oxides Fancy Bacchu Kada -g (pair)  ", price: 450  , cat:"Bangles", img:" assets/images/bangles/B-17.jpeg  "},
+      {id:"ban-18", name:" Oxides Fancy Bacchu Kada -h (pair)  ", price: 340  , cat:"Bangles", img:" assets/images/bangles/B-18.jpeg  "},
+      {id:"ban-19", name:" Oxides Fancy Bacchu Kada -i (pair)  ", price: 340 , cat:"Bangles", img:" assets/images/bangles/B-19.jpeg   "},
+      {id:"ban-20", name:" Oxides Fancy Bacchu Kada -j (pair) ", price:  450 , cat:"Bangles", img:" assets/images/bangles/B-20.jpeg  "},
+     
+ 
+
+      {id:"bra-01", name:"Minimal Bracelet", price:449, cat:"Bracelets", img:"https://via.placeholder.com/800x600?text=Bracelet+1"},
+      
+
+      // Traditional Clothing — sizes default to S/M/L/XL/XXL
+      {id:"cc-01", name:"Navratri Chaniya choli-a", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-1.jpeg"},
+      {id:"cc-02", name:"Navratri Chaniya choli-b ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-2.jpeg "},
+      {id:"cc-03", name:"Navratri Chaniya choli-c ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-3.jpeg "},
+      {id:"cc-04", name:"Navratri Chaniya choli-d ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-4.jpeg "},
+      {id:"cc-05", name:"Navratri Chaniya choli-e ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-5.jpeg "},
+      {id:"cc-06", name:"Navratri Chaniya choli-f ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-6.jpeg "},
+      {id:"cc-07", name:"Navratri Chaniya choli-g ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-7.jpeg "},
+      {id:"cc-08", name:"Navratri Chaniya choli-h ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-8.jpeg "},
+      {id:"cc-09", name:"Navratri Chaniya choli-i ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-9.jpeg "},
+      {id:"cc-10", name:"Navratri Chaniya choli-j ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-10.jpeg "},
+      {id:"cc-11", name:"Navratri Chaniya choli-k ", price:2649, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-11.jpeg "},
+      {id:"cc-12", name:"Navratri Chaniya choli-l ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-12.jpeg "},
+      {id:"cc-13", name:"Navratri Chaniya choli-m ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-13.jpeg "},
+      {id:"cc-14", name:"Navratri Chaniya choli-n ", price:2749, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-14.jpeg "},
+      {id:"cc-15", name:"Navratri Chaniya choli-o ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-15.jpeg "},
+      {id:"cc-16", name:"Navratri Chaniya choli-p ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-16.jpeg "},
+       {id:"cc-17", name:"Navratri Chaniya choli-q ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-17.jpeg "},
+       {id:"cc-18", name:"Navratri Chaniya choli-r ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-18.jpeg "},
+       {id:"cc-19", name:"Navratri Chaniya choli-s ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-19.jpeg "},
+       {id:"cc-20", name:"Navratri Chaniya choli-t ", price:2249, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-20.jpeg "},
+       {id:"cc-21", name:"Navratri Chaniya choli-u ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-21.jpeg "},
+       {id:"cc-22", name:"Navratri Chaniya choli-v ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-22.jpeg "},
+       {id:"cc-23", name:"Navratri Chaniya choli-w ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-23.jpeg "},
+       {id:"cc-24", name:"Navratri Chaniya choli-x ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-24.jpeg "},
+       {id:"cc-25", name:"Navratri Chaniya choli-y", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-25.jpeg "},
+       {id:"cc-26", name:"Navratri Chaniya choli-z ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-26.jpeg "},
+       {id:"cc-27", name:"Navratri Chaniya choli-aa ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-27.jpeg "},
+       {id:"cc-28", name:"Navratri Chaniya choli-ab ", price:2449, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-28.jpeg "},
+       {id:"cc-29", name:"Navratri Chaniya choli-ac ", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-29.jpeg "},  
+       {id:"cc-30", name:"Navratri Chaniya choli-ad ", price:2890, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-30.jpeg "},
+       {id:"cc-31", name:"Navratri Chaniya choli-ae ", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-31.jpeg "},
+       {id:"cc-32", name:"Navratri Chaniya choli-af ", price:2549, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-32.jpeg "},
+       {id:"cc-33", name:"Navratri Chaniya choli-ag ", price:2849, cat:"Chaniya Choli", img:"assets/chaniya choli images/CC-33.jpeg "},
+
+
+
+
+
+      {id:"kurti-01", name:"Cotton Kurti", price:1199, cat:"Kurtis", img:"https://via.placeholder.com/800x600?text=Kurti+1"},
+      {id:"kurta-01", name:"Men's Kurta", price:1599, cat:"Kurta", img:"https://via.placeholder.com/800x600?text=Kurta+1"}
     ];
 
-    const LS_KEYS = {
-      INV: "nitya_inventory_v1",
-      BUCKET: "nitya_bucket_v1"
+    // Default sizes for categories (used when a product has no explicit sizes)
+    const DEFAULT_SIZES = {
+      "Chaniya Choli": [ "Free Size","S","M","L","XL","XXL"], 
+      "Kurtis": [ "Free Size","S","M","L","XL","XXL"],
+      "Kurta": [ "Free Size","S","M","L","XL","XXL"],
+      "Bangles": ["2.2","2.4","2.6","2.8","2.10","2.12"] // as per your spec
     };
 
-    const state = {
-      inventory: [], // array of items with stock map
-      bucket: []     // [{id,name,price,size,qty}]
-    };
+    /* ===== State for per-product selected size ===== */
+    const selectedSize = new Map(); // key: productId, value: size
 
-    function loadState(){
-      const inv = localStorage.getItem(LS_KEYS.INV);
-      const buc = localStorage.getItem(LS_KEYS.BUCKET);
-      state.inventory = inv ? JSON.parse(inv) : DEMO_INVENTORY;
-      state.bucket = buc ? JSON.parse(buc) : [];
-    }
-    function persist(){
-      localStorage.setItem(LS_KEYS.INV, JSON.stringify(state.inventory));
-      localStorage.setItem(LS_KEYS.BUCKET, JSON.stringify(state.bucket));
-      updateKpis();
-    }
+    /* ===== Render Catalog by Subcategory ===== */
+    function renderCatalog(){
+      const groups = document.querySelectorAll('[data-grid]');
+      groups.forEach(g => g.innerHTML = "");
+      catalog.forEach(p => {
+        const grid = document.querySelector(`[data-grid="${p.cat}"]`);
+        if(!grid) return;
 
-    /*************************************
-     * Rendering
-     *************************************/
-    function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstChild; }
+        const card = document.createElement('div');
+        card.className = 'card';
 
-    function renderProducts(){
-      const jWrap = document.getElementById('jewelry');
-      const wWrap = document.getElementById('wearGrid');
-      jWrap.innerHTML = ''; wWrap.innerHTML = '';
+        // Build size buttons (from explicit sizes or default by category)
+        let sizeBlock = '';
+        const availSizes = (Array.isArray(p.sizes) && p.sizes.length) ? p.sizes : (DEFAULT_SIZES[p.cat] || [ ]);
+        if (availSizes.length) {
+          const opts = availSizes.map(sz => `<button class="size-btn" data-size="${sz}" data-for="${p.id}" aria-pressed="${selectedSize.get(p.id)===sz}">${sz}</button>`).join('');
+          
+          // HINT: show "Currently Available Size: Free Size" for categories EXCEPT Bangles
+          const hint = (p.cat === "Bangles") ? "" : `<div class="size-hint"><strong> Currently Available Size:</strong> ${ FREE_SIZE_LABEL}</div>`;
 
-      state.inventory.forEach(p => {
-        const sizeOptions = p.sizes.map(s=>`<option value="${s}">${s}</option>`).join('');
-        const totalStock = Object.values(p.stock).reduce((a,b)=>a+Number(b||0),0);
-        const card = el(`
-          <div class="card">
-            <div class="muted">${p.category} • ${p.sub}</div>
-            <h3>${p.name}</h3>
-            <div class="row"><span class="badge">ID: ${p.id}</span><span class="badge">₹${p.price}</span><span class="badge">Stock: ${totalStock}</span></div>
-            <div class="row" style="margin-top:8px">
-              <label>Size <select id="size-${p.id}">${sizeOptions}</select></label>
-              <label>Qty <input id="qty-${p.id}" type="number" min="1" value="1" style="width:90px"></label>
+          sizeBlock = `
+            <div class="sizes" role="group" aria-label="Select size">
+              ${opts}
             </div>
-            <div class="toolbar" style="margin-top:8px">
-              <button class="btn" onclick="addToBucket('${p.id}')">Add</button>
-            </div>
-          </div>`);
-        if(p.category === 'Imitation Jewelry') jWrap.appendChild(card); else wWrap.appendChild(card);
-      });
-    }
+            ${hint}`;
+        }
 
-    function renderBucket(){
-      const list = document.getElementById('bucketList');
-      list.innerHTML = '';
-      let total = 0; let count = 0;
-      state.bucket.forEach((it,idx)=>{
-        const line = el(`<div class="line">
-          <div>
-            <div><strong>${it.name}</strong> <span class="muted">(${it.size})</span></div>
-            <div class="muted">₹${it.price} × ${it.qty}</div>
-          </div>
-          <div class="row">
-            <button class="btn ghost" onclick="changeQty(${idx},-1)">-</button>
-            <button class="btn ghost" onclick="changeQty(${idx},+1)">+</button>
-            <button class="btn warn" onclick="removeFromBucket(${idx})">Remove</button>
-          </div>
-        </div>`);
-        list.appendChild(line);
-        total += it.price * it.qty; count += it.qty;
-      });
-      document.getElementById('bucketTotal').textContent = `₹${total.toFixed(2)}`;
-      updateKpis(count,total);
-    }
-
-    function renderStock(){
-      const wrap = document.getElementById('stockList');
-      wrap.innerHTML='';
-      state.inventory.forEach((p,pIndex)=>{
-        const sizeRows = p.sizes.map(s=>{
-          const stk = Number(p.stock[s]||0);
-          return `<div class="row" style="justify-content:space-between">
-            <div><span class="badge">${s}</span></div>
-            <div class="row">
-              <input type="number" min="0" value="${stk}" style="width:120px" oninput="onStockEdit(${pIndex}, '${s}', this.value)" />
+        card.innerHTML = `
+          <img class="thumb" src="${p.img}" alt="${p.name}"/>
+          <div class="pad">
+            <div class="title">${p.name}</div>
+            <div class="price">₹${p.price.toLocaleString()}</div>
+            ${sizeBlock}
+            <div class="btns">
+              <button class="btn add" data-add="${p.id}">Add to Bucket</button>
+              <button class="btn remove" data-remove="${p.id}">Remove</button>
             </div>
           </div>`;
-        }).join('');
-        const card = el(`
-          <div class="card">
-            <div class="muted">${p.category} • ${p.sub}</div>
-            <h3>${p.name}</h3>
-            <div class="list">${sizeRows}</div>
-          </div>`);
-        wrap.appendChild(card);
+        grid.appendChild(card);
       });
     }
 
-    function updateKpis(cntOverride,totalOverride){
-      const totalSkus = state.inventory.length;
-      const items = typeof cntOverride==='number' ? cntOverride : state.bucket.reduce((a,b)=>a+b.qty,0);
-      const total = typeof totalOverride==='number' ? totalOverride : state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
-      document.getElementById('kpiSkus').textContent = totalSkus;
-      document.getElementById('kpiItems').textContent = items;
-      document.getElementById('kpiTotal').textContent = `₹${total.toFixed(2)}`;
+    /* ===== Simple Bucket (Cart) with localStorage ===== */
+    const CART_KEY = 'nitya_cart_v3_sizes';
+    const cart = JSON.parse(localStorage.getItem(CART_KEY) || '{}');
+
+    function saveCart(){ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
+    function addItem(id, qty=1){ cart[id] = (cart[id]||0)+qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function removeItem(id, qty=1){ if(!cart[id]) return; cart[id] -= qty; if(cart[id] <= 0) delete cart[id]; saveCart(); refresh(); }
+    function clearCart(){ for(const k in cart) delete cart[k]; saveCart(); refresh(); }
+
+    function parseCartId(cid){
+      // supports id or id__SIZE
+      const [pid, size] = cid.split('__');
+      return {pid, size};
     }
 
-    /*************************************
-     * Bucket Ops
-     *************************************/
-    function findProduct(id){ return state.inventory.find(p=>p.id===id); }
-
-    function addToBucket(id){
-      const p = findProduct(id); if(!p) return;
-      const size = document.getElementById(`size-${id}`).value;
-      const qty = Math.max(1, Number(document.getElementById(`qty-${id}`).value || 1));
-      const available = Number(p.stock[size]||0);
-      if(qty>available){ alert(`Only ${available} in stock for size ${size}`); return; }
-      // merge if same item+size exists
-      const idx = state.bucket.findIndex(b=>b.id===id && b.size===size);
-      if(idx>-1){ state.bucket[idx].qty += qty; }
-      else { state.bucket.push({ id:p.id, name:p.name, price:p.price, size, qty }); }
-      // reduce stock
-      p.stock[size] = available - qty;
-      persist();
-      renderBucket(); renderStock(); renderProducts();
+    function cartItems(){
+      return Object.entries(cart).map(([cid,q])=>{
+        const {pid, size} = parseCartId(cid);
+        const base = catalog.find(p=>p.id===pid);
+        if(!base) return null;
+        return { ...base, cid, size, qty:q };
+      }).filter(Boolean);
     }
+    function cartTotal(){ return cartItems().reduce((s,i)=> s + i.price*i.qty, 0); }
 
-    function changeQty(idx,delta){
-      const it = state.bucket[idx]; if(!it) return;
-      const p = findProduct(it.id); const available = Number(p.stock[it.size]||0);
-      if(delta>0){ if(available<=0){ alert('No more stock'); return; } p.stock[it.size]=available-1; it.qty+=1; }
-      if(delta<0){ it.qty-=1; p.stock[it.size]=available+1; if(it.qty<=0){ state.bucket.splice(idx,1); } }
-      persist(); renderBucket(); renderStock(); renderProducts();
-    }
+    /* ===== UI Refresh ===== */
+    const bucketCount = document.getElementById('bucketCount');
+    const bucketTotal = document.getElementById('bucketTotal');
+    const bucketItemsEl = document.getElementById('bucketItems');
+    const cartList = document.getElementById('cartList');
+    const grandTotal = document.getElementById('grandTotal');
+    const orderSummary = document.getElementById('summary');
+    const hiddenDetails = document.getElementById('order_details');
+    const hiddenTotal = document.getElementById('order_total');
 
-    function removeFromBucket(idx){
-      const it = state.bucket[idx]; if(!it) return;
-      const p = findProduct(it.id);
-      p.stock[it.size] = Number(p.stock[it.size]||0) + it.qty; // return stock
-      state.bucket.splice(idx,1);
-      persist(); renderBucket(); renderStock(); renderProducts();
-    }
+    function refresh(){
+      const items = cartItems();
+      const total = cartTotal();
+      bucketCount.textContent = items.reduce((s,i)=>s+i.qty,0);
+      bucketItemsEl.textContent = bucketCount.textContent;
+      bucketTotal.textContent = `₹${total.toLocaleString()}`;
+      grandTotal.textContent = `₹${total.toLocaleString()}`;
 
-    function clearBucket(){
-      if(!confirm('Clear all items from bucket?')) return;
-      // return all stock
-      state.bucket.forEach(it=>{
-        const p = findProduct(it.id); if(p){ p.stock[it.size] = Number(p.stock[it.size]||0) + it.qty; }
+      cartList.innerHTML = items.length ? '' : '<p class="muted">Your bucket is empty. Add some products!</p>';
+      items.forEach(it => {
+        const row = document.createElement('div');
+        row.className = 'cart-item';
+        const sizeText = it.size ? ` <span class="small">(Size ${it.size})</span>` : '';
+        row.innerHTML = `
+          <img src="${it.img}" alt="${it.name}">
+          <div>
+            <div class="title">${it.name}${sizeText}</div>
+            <div class="small">Qty: ${it.qty} × ₹${it.price.toLocaleString()}</div>
+          </div>
+          <div>
+            <button class="btn" onclick="addItem('${it.cid}',1)">+1</button>
+            <button class="btn" onclick="removeItem('${it.cid}',1)">−1</button>
+          </div>`;
+        cartList.appendChild(row);
       });
-      state.bucket = [];
-      persist(); renderBucket(); renderStock(); renderProducts();
+
+      const lines = items.map(it => `• ${it.name}${it.size ? ' (Size ' + it.size + ')' : ''} — Qty ${it.qty} — ₹${(it.qty*it.price).toLocaleString()}`);
+      const summaryText = (lines.join('\n') || 'No items in bucket') + `\n\nTotal: ₹${total.toLocaleString()}`;
+      orderSummary.value = summaryText;
+      hiddenDetails.value = summaryText;
+      hiddenTotal.value = total;
+
+      updateUpi(total);
     }
 
-    /*************************************
-     * Stock Import/Export
-     *************************************/
-    function exportInventory(){ downloadJson('nitya_inventory.json', state.inventory); }
-    function importInventory(e){ readJsonFile(e,(data)=>{ state.inventory = data; persist(); renderAll(); }); }
+    /* ===== Size button selection & add/remove events ===== */
+    document.addEventListener('click', (e)=>{
+      const sizeBtn = e.target.closest('.size-btn');
+      if(sizeBtn){
+        const pid = sizeBtn.getAttribute('data-for');
+        const sz = sizeBtn.getAttribute('data-size');
+        selectedSize.set(pid, sz);
+        const card = sizeBtn.closest('.card');
+        card.querySelectorAll(`.size-btn[data-for="${pid}"]`).forEach(b=>b.setAttribute('aria-pressed','false'));
+        sizeBtn.setAttribute('aria-pressed','true');
+      }
 
-    function exportBucket(){ downloadJson('nitya_bucket.json', state.bucket); }
-    function importBucket(e){ readJsonFile(e,(data)=>{ state.bucket = data; persist(); renderAll(); }); }
+      const add = e.target.closest('[data-add]');
+      const rem = e.target.closest('[data-remove]');
 
-    function resetInventory(){ if(confirm('Reset inventory to demo data?')){ state.inventory = JSON.parse(JSON.stringify(DEMO_INVENTORY)); persist(); renderAll(); } }
+      if(add){
+        const pid = add.dataset.add;
+        const product = catalog.find(p=>p.id===pid);
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
+          const sel = selectedSize.get(pid);
+          if(!sel){ alert('Please select a size before adding to the bucket.'); return; }
+          addItem(`${pid}__${sel}`,1);
+        }else{
+          addItem(pid,1);
+        }
+      }
+      if(rem){
+        const pid = rem.dataset.remove;
+        const product = catalog.find(p=>p.id===pid);
+        const needSizes = (Array.isArray(product?.sizes) && product.sizes.length) ? product.sizes : (DEFAULT_SIZES[product?.cat] || []);
+        if(needSizes.length){
+          const sel = selectedSize.get(pid);
+          if(!sel){ alert('Select a size to remove.'); return; }
+          removeItem(`${pid}__${sel}`,1);
+        }else{
+          removeItem(pid,1);
+        }
+      }
+    });
 
-    function onStockEdit(pIndex,size,val){
-      const v = Math.max(0, Number(val||0));
-      state.inventory[pIndex].stock[size] = v;
-      persist(); renderProducts(); renderBucket();
+    /* ===== Drawer (Bucket) ===== */
+    const drawer = document.getElementById('drawer');
+    document.getElementById('openBucket').addEventListener('click', ()=>drawer.classList.add('open'));
+    document.getElementById('closeBucket').addEventListener('click', ()=>drawer.classList.remove('open'));
+    document.getElementById('emptyCart').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
+    document.getElementById('goOrder').addEventListener('click', ()=>drawer.classList.remove('open'));
+    document.getElementById('clearBucket').addEventListener('click', ()=>{ if(confirm('Clear all items from bucket?')) clearCart(); });
+
+    /* ===== UPI generation (Deep Link + QR) ===== */
+    const upiDeepLink = document.getElementById('upiDeepLink');
+    const qrBox = document.getElementById('qrBox');
+    const copyUpiBtn = document.getElementById('copyUpi');
+    const refreshQR = document.getElementById('refreshQR');
+
+    function upiUrl(amount){
+      const params = new URLSearchParams({ pa: UPI_ID, pn: PAYEE_NAME, am: String(amount||''), cu: 'INR' });
+      return `upi://pay?${params.toString()}`;
+    }
+    function updateUpi(amount){
+      upiDeepLink.href = upiUrl(amount);
+      const data = encodeURIComponent(upiUrl(amount));
+      const src = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${data}`;
+      qrBox.innerHTML = `<img alt="UPI QR Code" width="220" height="220" style="width:100%;height:100%;object-fit:contain" src="${src}">`;
     }
 
-    /*************************************
-     * Share (Mail / WhatsApp)
-     *************************************/
-    function shareOrder(){
-      if(state.bucket.length===0){ alert('Bucket is empty'); return; }
-      const lines = state.bucket.map(it=>`• ${it.name} (${it.size}) × ${it.qty} = ₹${(it.qty*it.price).toFixed(2)}`);
-      const total = state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
-      const text = `Order Request – Nitya Online Fashion%0A%0A${lines.join('%0A')}%0A%0ATotal: ₹${total.toFixed(2)}%0A%0AName:%20%0APhone:%20%0AAddress:%20`;
-      const subject = 'Order Request – Nitya Online Fashion';
-      const body = decodeURIComponent(text).replace(/%0A/g,'\n');
-      // open choices
-      const w = window.open('', '_blank');
-      w.document.write(`<p style="font-family:system-ui">Choose an option:</p>
-        <p><a href="mailto:nityaenterprises2603@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}">Email the order</a></p>
-        <p><a href="https://wa.me/?text=${text}" target="_blank" rel="noopener">Share via WhatsApp</a></p>
-        <p><button onclick="window.close()">Close</button></p>`);
-    }
+    copyUpiBtn.addEventListener('click', ()=>{
+      navigator.clipboard.writeText(UPI_ID).then(()=>{
+        copyUpiBtn.textContent='Copied!';
+        setTimeout(()=>copyUpiBtn.textContent='Copy',1200);
+      });
+    });
 
-    /*************************************
-     * UPI
-     *************************************/
-    function openUpiLink(){
-      const pa = document.getElementById('upiId').value.trim();
-      const pn = document.getElementById('upiName').value.trim() || 'Nitya Enterprises';
-      const bucketTotal = state.bucket.reduce((a,b)=>a+b.qty*b.price,0);
-      const am = document.getElementById('upiAmt').value.trim() || bucketTotal.toFixed(2);
-      if(!pa){ alert('Enter UPI ID (pa)'); return; }
-      const url = `upi://pay?pa=${encodeURIComponent(pa)}&pn=${encodeURIComponent(pn)}&am=${encodeURIComponent(am)}&cu=INR`;
-      // Most browsers won’t allow navigating custom scheme from iframe; try window.location
-      window.location.href = url;
-    }
+    refreshQR.addEventListener('click', ()=> updateUpi(cartTotal()));
 
-    /*************************************
-     * Helpers
-     *************************************/
-    function downloadJson(filename, data){
-      const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
-      URL.revokeObjectURL(url);
-    }
-    function readJsonFile(e, cb){
-      const file = e.target.files[0]; if(!file) return;
-      const fr = new FileReader();
-      fr.onload = () => { try{ const data = JSON.parse(fr.result); cb(data);} catch(err){ alert('Invalid JSON'); } };
-      fr.readAsText(file);
-    }
+    /* ===== WhatsApp share ===== */
+    const sendWhatsApp = document.getElementById('sendWhatsApp');
+    sendWhatsApp.addEventListener('click', ()=>{
+      const name = document.getElementById('custName').value || '(No name)';
+      const mobile = document.getElementById('mobile').value || '(No mobile)';
+      const alt = document.getElementById('altContact').value || '-';
+      const address = document.getElementById('addr').value || '(No address)';
+      const notes = document.getElementById('notes').value || '-';
+      const text = `*New Order — Nitya Enterprises*\n\n`+
+        `*Customer:* ${name}\n*Mobile:* ${mobile}\n*Alt:* ${alt}\n*Address:* ${address}\n*Notes:* ${notes}\n\n`+
+        `${orderSummary.value}`;
+      const url = `https://wa.me/${SELLER_WHATSAPP}?text=${encodeURIComponent(text)}`;
+      window.open(url,'_blank','noopener');
+    });
 
-    function renderAll(){ renderProducts(); renderBucket(); renderStock(); updateKpis(); }
+    /* ===== Form validation (basic) ===== */
+    document.getElementById('orderForm').addEventListener('submit', (e)=>{
+      if(cartTotal() <= 0){ e.preventDefault(); alert('Your bucket is empty. Please add items before submitting.'); return; }
+      if(!document.getElementById('mobile').checkValidity()){ e.preventDefault(); alert('Please enter a valid 10-digit mobile number.'); return; }
+    });
 
-    // Bootstrap
-    document.getElementById('year').textContent = new Date().getFullYear();
-    loadState();
-    renderAll();
+    // Init
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    renderCatalog();
+    refresh();
   </script>
 </body>
 </html>
