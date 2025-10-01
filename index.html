@@ -862,11 +862,14 @@
     refresh();
   </script>
 
-<!-- ===== Inventory Remote Sync (JSONBin via API_BASE server) ===== -->
+<!-- ===== Inventory Remote Sync (JSONBin) ===== -->
 <script>
 (() => {
   // ----- CONFIG -----
-  const API_BASE = "http://localhost:8080"; // Replace with deployed server base URL
+  const JSONBIN_BIN_ID     = "68b3e91642be1c4f08a347e3";
+  const JSONBIN_MASTER_KEY = "$2a$10$CZkZKSX19iiTtO/.03ihxOTi2R/yGiCGYzdidVWgoN6JHmH8RYq0.";
+  // -------------------
+
   const w = window;
   const INV_KEY = w.INV_KEY || 'nitya_inventory_v1';
 
@@ -878,17 +881,20 @@
     try { localStorage.setItem(INV_KEY, JSON.stringify(obj || {})); } catch {}
   }
 
+  // ---- JSONBin v3 helpers ----
   async function pullInventoryRemote(){
     try{
-      const res = await fetch(`${API_BASE}/inventory`);
+      const url = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`;
+      const res = await fetch(url, { headers: { "X-Master-Key": JSONBIN_MASTER_KEY } });
       if(!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
-      if (typeof data === "object") {
-        saveInvLocal(data);
+      const body = (data && data.record) || {};
+      if (typeof body === "object") {
+        saveInvLocal(body);
         w.renderCatalog?.();
         w.refresh?.();
       }
-      return data;
+      return body;
     }catch(e){
       console.warn("[Inv] pull failed; using local copy:", e);
       return null;
@@ -896,34 +902,47 @@
   }
 
   async function pushInventoryRemote(obj){
-    const res = await fetch(`${API_BASE}/inventory`, {
+    const url = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
+    const res = await fetch(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Master-Key": JSONBIN_MASTER_KEY
+      },
+      // JSONBin v3 expects RAW JSON body (no {record: ...})
       body: JSON.stringify(obj || {})
     });
-    if(!res.ok) throw new Error("HTTP " + res.status);
+    if(!res.ok){
+      const t = await res.text().catch(()=>'');
+      throw new Error("HTTP " + res.status + " " + t);
+    }
     return res.json();
   }
 
   w.pullInventoryRemote = pullInventoryRemote;
   w.pushInventoryRemote = pushInventoryRemote;
 
+  // Pull latest on load
   document.addEventListener('DOMContentLoaded', () => { pullInventoryRemote(); });
 
+  // Hook Save Changes
   const saveBtn = document.getElementById('saveInv');
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
       try{
         const inv = loadInvLocal();
+        console.log("[Inv] pushing to JSONBin", inv);
         await pushInventoryRemote(inv);
+        console.log("[Inv] push complete");
         alert("Inventory synced to server.");
       }catch(e){
         console.warn(e);
-        alert("Saved locally, but server sync failed.");
+        alert("Saved locally, but server sync failed. See console.");
       }
     });
   }
 
+  // Auto-decrement on order submit
   const form = document.getElementById('orderForm');
   if (form) {
     form.addEventListener('submit', async () => {
