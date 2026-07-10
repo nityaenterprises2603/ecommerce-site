@@ -165,6 +165,14 @@
       cursor:pointer;
       font-weight:600;
     }
+
+.card{position:relative;}
+.zoom-link{
+position:absolute;top:10px;right:10px;width:40px;height:40px;border-radius:50%;
+background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;
+text-decoration:none;font-size:22px;color:#333;box-shadow:0 3px 8px rgba(0,0,0,.25);z-index:5;transition:.2s;}
+.zoom-link:hover{background:#fff;transform:scale(1.1);}
+
 </style>
 </head>
 <body>
@@ -550,7 +558,10 @@
         }
 
         card.innerHTML = `
+          <div style="position:relative;">
           <img class="thumb" src="${p.img}" alt="${p.name}"/>
+          <a class="zoom-link" href="${p.img}" target="_blank" title="View Full Image" onclick="event.stopPropagation();">🔍</a>
+        </div>
           <div class="pad">
             <div class="title">${p.name}</div>
             <div class="price">₹${p.price.toLocaleString()}</div>
@@ -1078,6 +1089,5 @@
 
 </body>
 </html>
-
 
 
